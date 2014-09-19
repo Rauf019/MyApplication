@@ -70,7 +70,8 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
             actionBar.addTab(
                     actionBar.newTab()
                             .setText(mSectionsPagerAdapter.getPageTitle(i))
-                            .setTabListener(this));
+                            .setTabListener(this)
+            );
         }
     }
 
@@ -109,62 +110,9 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
     }
 
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
-
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            switch (position) {
-                case 0:
-                    return PlaceholderFragment.newInstance(position + 1);
-
-                case 1:
-                    return Contact_Frag.newInstance(position + 1);
-
-                case 2:
-                    return Message_Frag.newInstance(position + 1);
-
-                case 3:
-
-                    return Call_log_Frag.newInstance(position + 1);
-
-            }
-            return null;
-        }
-
-        @Override
-        public int getCount() {
-            // Show 3 total pages.
-            return 4;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            Locale l = Locale.getDefault();
-            switch (position) {
-                case 0:
-                    return getString(R.string.title_section1).toUpperCase(l);
-                case 1:
-                    return getString(R.string.title_section2).toUpperCase(l);
-                case 2:
-                    return getString(R.string.title_section3).toUpperCase(l);
-                case 3:
-                    return getString(R.string.title_section4).toUpperCase(l);
-            }
-            return null;
-        }
-    }
-
     public static class Contact_Frag extends Fragment {
-        public DataBaseHelper dataBaseHelper;
         private static final String ARG_SECTION_NUMBER = "section_number";
+        public DataBaseHelper dataBaseHelper;
         Contact_Adapter myArrayAdapter = null;
 
         public static Contact_Frag newInstance(int sectionNumber) {
@@ -191,7 +139,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                 myArrayAdapter = new Contact_Adapter(getActivity(), Sms.Read_Contact(getActivity()));
             }
 
-           dataBaseHelper.getAllContacts();
+            dataBaseHelper.getAllContacts();
             listView.setAdapter(myArrayAdapter);
 
             return rootView;
@@ -215,7 +163,6 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                 super.sort(comparator);
 
 
-
             }
 
             @Override
@@ -230,6 +177,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                     viewHolder.name = (TextView) rowView.findViewById(R.id.name);
                     viewHolder.checkBox = (CheckBox) rowView.findViewById(R.id.check);
                     viewHolder.letterImageView = (LetterImageView) rowView.findViewById(R.id.iv_avatar);
+                    viewHolder.letterImageView.setOval(true);
                     rowView.setTag(viewHolder);
 
                 }
@@ -237,6 +185,8 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                 Sms.Read_contacts s = names.get(position);
                 ViewHolder viewHolder = (ViewHolder) rowView.getTag();
                 viewHolder.name.setText(s.getName());
+
+
                 viewHolder.letterImageView.setLetter(s.getName().charAt(0));
 
                 if (viewHolder.checkBox.isChecked()) {
@@ -365,7 +315,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                 viewHolder.name.setText(s.getName());
                 //    viewHolder.number.setText(s.getNumber());
 
-
+                viewHolder.letterImageView.isOval();
                 viewHolder.letterImageView.setLetter('C');
 
                 return rowView;
@@ -478,6 +428,9 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
 
+        public PlaceholderFragment() {
+        }
+
         /**
          * Returns a new instance of this fragment for the given section
          * number.
@@ -490,14 +443,64 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
             return fragment;
         }
 
-        public PlaceholderFragment() {
-        }
-
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_my, container, false);
             return rootView;
+        }
+    }
+
+    /**
+     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
+     * one of the sections/tabs/pages.
+     */
+    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            switch (position) {
+                case 0:
+                    return PlaceholderFragment.newInstance(position + 1);
+
+                case 1:
+                    return Contact_Frag.newInstance(position + 1);
+
+                case 2:
+                    return Message_Frag.newInstance(position + 1);
+
+                case 3:
+
+                    return Call_log_Frag.newInstance(position + 1);
+
+            }
+            return null;
+        }
+
+        @Override
+        public int getCount() {
+            // Show 3 total pages.
+            return 4;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            Locale l = Locale.getDefault();
+            switch (position) {
+                case 0:
+                    return getString(R.string.title_section1).toUpperCase(l);
+                case 1:
+                    return getString(R.string.title_section2).toUpperCase(l);
+                case 2:
+                    return getString(R.string.title_section3).toUpperCase(l);
+                case 3:
+                    return getString(R.string.title_section4).toUpperCase(l);
+            }
+            return null;
         }
     }
 

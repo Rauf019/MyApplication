@@ -8,6 +8,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
+
 import java.util.Random;
 
 public class LetterImageView extends ImageView {
@@ -23,11 +24,9 @@ public class LetterImageView extends ImageView {
         init();
     }
 
-
     private void init() {
         mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mTextPaint.setColor(mTextColor);
-
         mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBackgroundPaint.setStyle(Paint.Style.FILL);
         mBackgroundPaint.setColor(randomColor());
@@ -67,23 +66,19 @@ public class LetterImageView extends ImageView {
             // Set a text font size based on the height of the view
             mTextPaint.setTextSize(canvas.getHeight() - getTextPadding() * 2);
             if (isOval()) {
-                canvas.drawCircle(100, 100, 2,
+                canvas.drawCircle(canvas.getWidth() / 2f, canvas.getHeight() / 2f, Math.min(canvas.getWidth(), canvas.getHeight()) / 2f,
                         mBackgroundPaint);
             } else {
-                canvas.drawRect(0, 0, 150, 150, mBackgroundPaint);
-
+                canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), mBackgroundPaint);
             }
             // Measure a text
             Rect textBounds = new Rect();
             mTextPaint.getTextBounds(String.valueOf(mLetter), 0, 1, textBounds);
-
             float textWidth = mTextPaint.measureText(String.valueOf(mLetter));
             float textHeight = textBounds.height();
             // Draw the text
-            canvas.drawText(String.valueOf(mLetter), 150,
-                    150, mTextPaint);
-
-
+            canvas.drawText(String.valueOf(mLetter), canvas.getWidth() / 2f - textWidth / 2f,
+                    canvas.getHeight() / 2f + textHeight / 2f, mTextPaint);
         }
     }
 
@@ -97,5 +92,4 @@ public class LetterImageView extends ImageView {
         String[] colorsArr = getResources().getStringArray(R.array.colors);
         return Color.parseColor(colorsArr[random.nextInt(colorsArr.length)]);
     }
-
 }
