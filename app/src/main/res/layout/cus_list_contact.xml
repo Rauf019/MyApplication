@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.example.my_computer.myapplication.LetterImageView
+            android:id="@+id/iv_avatar"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_margin="5dp"
+            />
+        <!--<TextView-->
+        <!--android:id="@+id/number"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="start"-->
+        <!--android:fontFamily="sans"-->
+        <!--android:text="Num"-->
+        <!--android:textColor="@android:color/darker_gray"-->
+        <!--android:textSize="16sp"-->
+        <!--android:textStyle="normal"-->
+        <!--android:layout_below="@+id/checkBox"-->
+        <!--android:layout_alignLeft="@+id/name"-->
+        <!--android:layout_alignStart="@+id/name" />-->
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_toEndOf="@+id/iv_avatar"
+
+            android:text="Name"
+            android:textSize="23sp"
+            android:textStyle="normal"
+            android:typeface="sans"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/iv_avatar"
+            android:layout_toLeftOf="@+id/check"
+            android:layout_toStartOf="@+id/check" />
+
+        <CheckBox
+            android:id="@+id/check"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:layout_marginRight="49dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+    </RelativeLayout>
+
+</RelativeLayout>
