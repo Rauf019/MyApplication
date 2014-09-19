@@ -8,9 +8,9 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
-
 import java.util.Random;
 
+//123
 public class LetterImageView extends ImageView {
 
     private char mLetter;
@@ -50,12 +50,12 @@ public class LetterImageView extends ImageView {
         invalidate();
     }
 
-    public void setOval(boolean oval) {
-        isOval = oval;
-    }
-
     public boolean isOval() {
         return isOval;
+    }
+
+    public void setOval(boolean oval) {
+        isOval = oval;
     }
 
     @Override
