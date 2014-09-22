@@ -1,4 +1,4 @@
-package com.example.my_computer.myapplication;
+package ClassLib;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -13,7 +13,6 @@ import java.util.List;
 public class DataBaseHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 2;
-    // Database Name
     private static final String DATABASE_NAME = "Call_blocker";
     private static final String TABLE_CONTACTS = "Contacts";
     private static final String PHONE_NUMBER = " PHONE_NUMBER ";
@@ -31,7 +30,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         String CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_CONTACTS + "("
                 + PHONE_NUMBER + " VARCHAR Primary Key ," + NAME + " VARCHAR," + IS_CALL_BLOCK
                 + " BOOLEAN, " + IS_MSG_BLOCK + " BOOLEAN " + ");";
-
         Log.d("TAG", CREATE_CONTACTS_TABLE);
         db.execSQL(CREATE_CONTACTS_TABLE);
     }
@@ -53,10 +51,9 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
             values.put(PHONE_NUMBER, contact.get_phoneNumber());
             values.put(NAME, contact.get_Name());
-            values.put(IS_CALL_BLOCK, contact._is_Call_block);
-            values.put(IS_MSG_BLOCK, contact._is_Msg_block);
+            values.put(IS_CALL_BLOCK, contact.get_is_Call_block());
+            values.put(IS_MSG_BLOCK, contact.get_is_Msg_block());
             db.insert(TABLE_CONTACTS, null, values);
-
             db.close();
         } catch (Exception e) {
             // TODO Auto-generated catch block
@@ -102,7 +99,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 do {
                     Contact contact = new Contact();
 
-
                     Log.d("Database", cursor.getString(0));
                     Log.d("Database", cursor.getString(1));
                     Log.d("Database", cursor.getString(2));
@@ -134,8 +130,8 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
             ContentValues values = new ContentValues();
             values.put(PHONE_NUMBER, contact.get_phoneNumber()); // Contact Name
-            values.put(IS_CALL_BLOCK, contact._is_Call_block);
-            values.put(IS_MSG_BLOCK, contact._is_Msg_block);
+            values.put(IS_CALL_BLOCK, contact.get_is_Call_block());
+            values.put(IS_MSG_BLOCK, contact.get_is_Msg_block());
 
 
             db.update(TABLE_CONTACTS, values, PHONE_NUMBER + " = ?",

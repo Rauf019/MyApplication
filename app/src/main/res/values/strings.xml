@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">My Application</string>
+    <string name="app_name">Call Blocker</string>
     <string name="title_section1">All List</string>
     <string name="title_section2">By Contact </string>
     <string name="title_section3">By Message</string>
     <string name="title_section4">By Call Log</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+
     <string-array name="colors" translatable="false">
         <item>#99cc00</item>
         <item>#33b5e5</item>
@@ -29,10 +30,12 @@
     </string-array>
 
     <string name="action_contact">Contact</string>
-
     <string name="action_fastscroll">Fast scroll</string>
     <string name="action_addpadding">Add padding</string>
     <string name="action_showShadow">Show shadow</string>
     <string name="action_showHeaderAndFooter">Show Header &amp; Footer</string>
+    <string name="title_activity_fullscreen">FullscreenActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 
 </resources>

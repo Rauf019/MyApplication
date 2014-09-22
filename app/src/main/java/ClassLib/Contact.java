@@ -1,4 +1,4 @@
-package com.example.my_computer.myapplication;
+package ClassLib;
 
 public class Contact {
     String _Name;
@@ -17,18 +17,17 @@ public class Contact {
 
     }
 
+    public Contact() {
+        // TODO Auto-generated constructor stub
+    }
+
+
     public String get_Name() {
         return _Name;
     }
 
     public void set_Name(String _Name) {
         this._Name = _Name;
-    }
-
-
-
-    public Contact() {
-        // TODO Auto-generated constructor stub
     }
 
     public String get_phoneNumber() {

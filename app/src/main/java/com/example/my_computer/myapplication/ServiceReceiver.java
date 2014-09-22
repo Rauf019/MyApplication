@@ -17,6 +17,16 @@ import android.util.Log;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import ClassLib.Contact;
+
+interface ITelephony {
+    boolean endCall();
+
+    void answerRingingCall();
+
+    void silenceRinger();
+}
+
 public class ServiceReceiver extends BroadcastReceiver {
 
     List<Contact> contacts;
@@ -83,37 +93,13 @@ public class ServiceReceiver extends BroadcastReceiver {
         telephony.listen(null, PhoneStateListener.LISTEN_NONE);
     }
 
-    class MyPhoneStateListener extends PhoneStateListener {
-
-        public void onCallStateChanged(int state, String incomingNumber) {
-
-            switch (state) {
-                case TelephonyManager.CALL_STATE_IDLE:
-                    Log.d("DEBUG", "CALL_STATE_IDLE");
-
-                    break;
-                case TelephonyManager.CALL_STATE_OFFHOOK:
-                    Log.d("DEBUG", "CALL_STATE_OFFHOOK");
-
-                    break;
-                case TelephonyManager.CALL_STATE_RINGING:
-                    Log.d("DEBUG", "CALL_STATE_RINGING");
-                    notification("Call Blocker", "Call Block from ");
-                    Call_Filter();
-                    break;
-
-            }
-        }
-
-    }
-
     public void notification(String Not_Title, String text) {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
                 context).setSmallIcon(R.drawable.ic_launcher)
                 .setContentTitle(Not_Title).setContentText(text)
                 .setAutoCancel(true);
         Intent intent = new Intent(context, MyActivity.class);
-        PendingIntent pi = PendingIntent.getActivity(context, 0, intent,PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pi = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         mBuilder.setContentIntent(pi);
         NotificationManager mNotificationManager = (NotificationManager) context
@@ -159,10 +145,45 @@ public class ServiceReceiver extends BroadcastReceiver {
         }
     }
 
+    class MyPhoneStateListener extends PhoneStateListener {
+
+        public void onCallStateChanged(int state, String incomingNumber) {
+
+            switch (state) {
+                case TelephonyManager.CALL_STATE_IDLE:
+                    Log.d("DEBUG", "CALL_STATE_IDLE");
+
+                    break;
+                case TelephonyManager.CALL_STATE_OFFHOOK:
+                    Log.d("DEBUG", "CALL_STATE_OFFHOOK");
+
+                    break;
+                case TelephonyManager.CALL_STATE_RINGING:
+                    Log.d("DEBUG", "CALL_STATE_RINGING");
+                    notification("Call Blocker", "Call Block from ");
+                    Call_Filter();
+                    break;
+
+            }
+        }
+
+    }
+
 
 }
 
 class messageData {
+
+    long _id, _thread_id;
+    String _Add, _Body;
+
+    public messageData(long _id, long _thread_id, String _Add, String _Body) {
+        super();
+        this._id = _id;
+        this._Add = _Add;
+        this._Body = _Body;
+        this._thread_id = _thread_id;
+    }
 
     public long get_id() {
         return _id;
@@ -188,16 +209,6 @@ class messageData {
         this._Body = _Body;
     }
 
-    public messageData(long _id, long _thread_id, String _Add, String _Body) {
-        super();
-        this._id = _id;
-        this._Add = _Add;
-        this._Body = _Body;
-        this._thread_id = _thread_id;
-    }
-
-    long _id, _thread_id;
-
     public long get_thread_id() {
         return _thread_id;
     }
@@ -206,14 +217,4 @@ class messageData {
         this._thread_id = _thread_id;
     }
 
-    String _Add, _Body;
-
-}
-
-interface ITelephony {
-    boolean endCall();
-
-    void answerRingingCall();
-
-    void silenceRinger();
 }

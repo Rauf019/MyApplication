@@ -1,32 +1,33 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".MyActivity" >
-    <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
+    tools:context=".MyActivity">
+    <item
+        android:id="@+id/action_settings"
         android:orderInCategory="100"
+        android:title="@string/action_settings"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_fastscroll"
-        android:showAsAction="never"
+        android:checkable="true"
         android:title="@string/action_fastscroll"
-        android:checkable="true"/>
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_addpadding"
-        android:showAsAction="never"
+        android:checkable="true"
         android:title="@string/action_addpadding"
-        android:checkable="true"/>
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_showShadow"
-        android:showAsAction="never"
+        android:checkable="true"
         android:title="@string/action_showShadow"
-        android:checkable="true"/>
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_showHeaderAndFooter"
-        android:showAsAction="never"
+        android:checkable="true"
         android:title="@string/action_showHeaderAndFooter"
-        android:checkable="true"/>
+        app:showAsAction="never" />
 </menu>

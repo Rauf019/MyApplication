@@ -1,4 +1,4 @@
-package com.example.my_computer.myapplication;
+package ClassLib;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -7,6 +7,8 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.widget.ImageView;
+
+import com.example.my_computer.myapplication.R;
 
 import java.util.Random;
 
@@ -37,7 +39,15 @@ public class LetterImageView extends ImageView {
     }
 
     public void setLetter(char letter) {
-        mLetter = letter;
+
+        if (Character.isLetter(letter)) {
+            mLetter = Character.toUpperCase(letter);
+
+        } else {
+            mLetter = '#';
+
+        }
+
         invalidate();
     }
 
