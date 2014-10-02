@@ -3,9 +3,11 @@ package ClassLib;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,17 +21,29 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     private static final String NAME = " NAME ";
     private static final String IS_CALL_BLOCK = " IS_CALL_BLOCK ";
     private static final String IS_MSG_BLOCK = " IS_MSG_BLOCK ";
-    private static final String IS_BOTH_BLOCK = " IS_BOTH_BLOCK ";
+    private static final String PHOTO = " PHOTO ";
+    private Context context;
 
     public DataBaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this.context = context;
+    }
+
+    public static boolean stringToBool(String s) {
+        if (s.equals("1"))
+            return true;
+        if (s.equals("0"))
+            return false;
+        throw new IllegalArgumentException(s + " is not a bool. Only 1 and 0 are.");
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_CONTACTS + "("
                 + PHONE_NUMBER + " VARCHAR Primary Key ," + NAME + " VARCHAR," + IS_CALL_BLOCK
-                + " BOOLEAN, " + IS_MSG_BLOCK + " BOOLEAN " + ");";
+                + " BOOLEAN, " + IS_MSG_BLOCK + " BOOLEAN ," + PHOTO + " VARCHAR " + ");";
+
+
         Log.d("TAG", CREATE_CONTACTS_TABLE);
         db.execSQL(CREATE_CONTACTS_TABLE);
     }
@@ -44,75 +58,168 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     }
 
     public void addContact(Contact contact) {
+
         try {
             SQLiteDatabase db = this.getWritableDatabase();
-
             ContentValues values = new ContentValues();
-
             values.put(PHONE_NUMBER, contact.get_phoneNumber());
             values.put(NAME, contact.get_Name());
             values.put(IS_CALL_BLOCK, contact.get_is_Call_block());
             values.put(IS_MSG_BLOCK, contact.get_is_Msg_block());
-            db.insert(TABLE_CONTACTS, null, values);
+            values.put(PHOTO, contact.getPhoto());
+            long insert = db.insert(TABLE_CONTACTS, null, values);
+            if (insert != -1) {
+                Toast.makeText(context, "Successfully Added", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(context, "Unable to Added", Toast.LENGTH_LONG).show();
+            }
             db.close();
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
     }
 
     public Contact getContact(String a) {
+
+        Contact contact = null;
         try {
+
+
             SQLiteDatabase db = this.getReadableDatabase();
-
+            contact = new Contact();
             Cursor cursor = db.query(TABLE_CONTACTS, new String[]{
-                            PHONE_NUMBER, IS_CALL_BLOCK, IS_MSG_BLOCK, IS_BOTH_BLOCK},
-                    PHONE_NUMBER + "=?", new String[]{String.valueOf(a)},
+                            PHONE_NUMBER, NAME, IS_CALL_BLOCK, IS_MSG_BLOCK, PHOTO},
+                    PHONE_NUMBER + "= ?", new String[]{String.valueOf(a)},
                     null, null, null, null);
-            if (cursor != null)
-                cursor.moveToFirst();
-            Contact contact = new Contact();
-            contact.set_phoneNumber(cursor.getString(0));
-            contact.set_Name(cursor.getString(1));
-            contact.set_is_Call_block(Boolean.getBoolean(cursor.getString(2)));
-            contact.set_is_Msg_block(Boolean.getBoolean(cursor.getString(3)));
 
+            cursor.moveToFirst();
+
+
+            do {
+                contact.set_phoneNumber(cursor.getString(0));
+                contact.set_Name(cursor.getString(1));
+
+                contact.set_is_Call_block(stringToBool(cursor.getString(2)));
+
+                contact.set_is_Msg_block(stringToBool(cursor.getString(3)));
+            } while (cursor.moveToNext());
+
+            db.close();
+            cursor.close();
             return contact;
+
         } catch (Exception e) {
 
-            e.printStackTrace();
+            String message = e.getMessage();
+            return contact;
         }
-        return null;
+
+
     }
 
-    public void getAllContacts() {
+    public List<Contact> Sort_By(String val) {
+
+        List<Contact> contactList = null;
         try {
-            List<Contact> contactList = new ArrayList<Contact>();
+
+
+            SQLiteDatabase db = this.getReadableDatabase();
+            contactList = new ArrayList<Contact>();
+
+            String sql_statement = "SELECT * FROM " + TABLE_CONTACTS + " WHERE " + val + " = " + " 1 ";
+            Cursor cursor = db.rawQuery(sql_statement, null);
+
+            cursor.moveToFirst();
+
+            do {
+                Contact contact = new Contact();
+                contact.set_phoneNumber(cursor.getString(0));
+                contact.set_Name(cursor.getString(1));
+                contact.set_is_Call_block(stringToBool(cursor.getString(2)));
+                contact.set_is_Msg_block(stringToBool(cursor.getString(3)));
+                contact.setPhoto(cursor.getString(4));
+                contactList.add(contact);
+            } while (cursor.moveToNext());
+
+            db.close();
+            cursor.close();
+            return contactList;
+        } catch (CursorIndexOutOfBoundsException e) {
+
+            String message = e.getMessage();
+
+            return contactList;
+        } catch (NullPointerException e) {
+
+            String message = e.getMessage();
+
+            return contactList;
+        }
+
+
+    }
+
+    public List<Contact> getAllContacts() {
+
+        List<Contact> contactList = null;
+
+        try {
+            contactList = new ArrayList<Contact>();
 
             String selectQuery = "SELECT * FROM " + TABLE_CONTACTS;
 
             SQLiteDatabase db = this.getWritableDatabase();
             Cursor cursor = db.rawQuery(selectQuery, null);
+            cursor.moveToFirst();
 
-            if (cursor.moveToFirst()) {
-                do {
-                    Contact contact = new Contact();
+            do {
 
-                    Log.d("Database", cursor.getString(0));
-                    Log.d("Database", cursor.getString(1));
-                    Log.d("Database", cursor.getString(2));
-                    Log.d("Database", cursor.getString(3));
-                    //     contactList.add(contact);
-                } while (cursor.moveToNext());
+                contactList.add(new Contact(cursor.getString(0), cursor.getString(1),
+                        stringToBool(cursor.getString(2)), stringToBool(cursor.getString(3)), cursor.getString(4)));
 
-            }
+            } while (cursor.moveToNext());
+
+            db.close();
+            cursor.close();
+            return contactList;
 
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            return contactList;
         }
+    }
 
+
+    public List<Contact> getAllContacts_true() {
+
+        List<Contact> contactList = null;
+
+        try {
+            contactList = new ArrayList<Contact>();
+
+            String sql_statement = "SELECT * FROM " + TABLE_CONTACTS + " WHERE " + IS_CALL_BLOCK + " != " + " 0 " + " AND " + IS_MSG_BLOCK + " != " + " 0 ";
+
+            SQLiteDatabase db = this.getWritableDatabase();
+            Cursor cursor = db.rawQuery(sql_statement, null);
+            cursor.moveToFirst();
+
+            do {
+
+                contactList.add(new Contact(cursor.getString(0), cursor.getString(1),
+                        stringToBool(cursor.getString(2)), stringToBool(cursor.getString(3)), cursor.getString(4)));
+
+            } while (cursor.moveToNext());
+
+            db.close();
+            cursor.close();
+            return contactList;
+
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return contactList;
+        }
     }
 
     public int getContactsCount() {
@@ -130,25 +237,31 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
             ContentValues values = new ContentValues();
             values.put(PHONE_NUMBER, contact.get_phoneNumber()); // Contact Name
+
+            values.put(NAME, contact.get_Name());
             values.put(IS_CALL_BLOCK, contact.get_is_Call_block());
             values.put(IS_MSG_BLOCK, contact.get_is_Msg_block());
+            values.put(PHOTO, contact.getPhoto());
 
-
-            db.update(TABLE_CONTACTS, values, PHONE_NUMBER + " = ?",
+            int update = db.update(TABLE_CONTACTS, values, PHONE_NUMBER + " = ?",
                     new String[]{String.valueOf(contact.get_phoneNumber())});
-
+            db.close();
             return true;
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            return false;
         }
-        return false;
+
     }
 
-    public void deleteContact(Contact contact) {
+    public int deleteContact(String val) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_CONTACTS, PHONE_NUMBER + " = ?",
-                new String[]{String.valueOf(contact.get_phoneNumber())});
+        int delete = db.delete(TABLE_CONTACTS, PHONE_NUMBER + " = ?",
+                new String[]{String.valueOf(val)});
+
+
         db.close();
+        return delete;
     }
 }

@@ -12,10 +12,6 @@
         <item name="android:background">@drawable/background_back</item>
     </style>
 
-    <style name="MyListFrontContent">
-        <item name="android:background">@drawable/background_front</item>
-        <item name="android:padding">1dp</item>
-    </style>
 
     <style name="MyListButtonAction">
         <item name="android:layout_margin">5dp</item>
@@ -39,10 +35,12 @@
     </style>
 
     <style name="FullscreenTheme" parent="android:Theme.NoTitleBar">
+
+
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowBackground">@null</item>
-        <item name="metaButtonBarStyle">@style/ButtonBar</item>
-        <item name="metaButtonBarButtonStyle">@style/ButtonBarButton</item>
+
+
     </style>
 
     <style name="ButtonBar">

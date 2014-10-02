@@ -1,20 +1,25 @@
 package com.example.my_computer.myapplication;
 
 public class Read_contacts {
-    String Name, Number;
+    String Name;
+    String Number;
+    private String photo;
+    private int type;
 
-    Read_contacts(String name, String number) {
+    Read_contacts(String name, String number, String photo) {
 
         Number = number;
-        if (name != null) {
+        Name = name;
 
-            Name = name;
-        } else {
+        this.photo = photo;
+    }
 
-            Name = number;
+    public String getPhoto() {
+        return photo;
+    }
 
-        }
-
+    public void setPhoto(String photo) {
+        this.photo = photo;
     }
 
     public String getName() {

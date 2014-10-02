@@ -9,27 +9,37 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.etsy.android.grid.util.DynamicHeightTextView;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
-/**
- * ADAPTER
- */
+import ClassLib.Contact;
+import ClassLib.DataBaseHelper;
 
-public class SampleAdapter extends ArrayAdapter<String> {
+
+public class SampleAdapter extends ArrayAdapter<Contact> {
 
     private static final String TAG = "SampleAdapter";
     private static final SparseArray<Double> sPositionHeightRatios = new SparseArray<Double>();
     private final LayoutInflater mLayoutInflater;
     private final Random mRandom;
     private final ArrayList<Integer> mBackgroundColors;
+    DataBaseHelper dataBaseHelper;
+    private List<Contact> contact1;
 
-    public SampleAdapter(final Context context, final int textViewResourceId) {
-        super(context, textViewResourceId);
+    public SampleAdapter(final Context context, List<Contact> contact1) {
+        super(context, R.layout.list_item_sample, contact1);
+        dataBaseHelper = new DataBaseHelper(getContext());
+
+
+        this.contact1 = contact1;
         mLayoutInflater = LayoutInflater.from(context);
+        dataBaseHelper = new DataBaseHelper(getContext());
         mRandom = new Random();
         mBackgroundColors = new ArrayList<Integer>();
         mBackgroundColors.add(R.color.orange);
@@ -41,18 +51,29 @@ public class SampleAdapter extends ArrayAdapter<String> {
         mBackgroundColors.add(R.color.blue_light);
         mBackgroundColors.add(R.color.green);
         mBackgroundColors.add(R.color.green_light);
+
+    }
+
+    public void updateReceiptsList() {
+
+        contact1.clear();
+        contact1.addAll(dataBaseHelper.getAllContacts());
+        this.notifyDataSetChanged();
     }
 
     @Override
     public View getView(final int position, View convertView, final ViewGroup parent) {
+
 
         ViewHolder vh;
         if (convertView == null) {
             convertView = mLayoutInflater.inflate(R.layout.list_item_sample, parent, false);
             vh = new ViewHolder();
             vh.txtLineOne = (DynamicHeightTextView) convertView.findViewById(R.id.txt_line1);
-            //  vh.btnGo = (ImageView) convertView.findViewById(R.id.btn_go);
 
+            //   vh.textView = (TextView) convertView.findViewById(R.id.textView);
+
+            vh.btnGo = (ImageView) convertView.findViewById(R.id.call_icon);
             convertView.setTag(vh);
         } else {
             vh = (ViewHolder) convertView.getTag();
@@ -63,29 +84,49 @@ public class SampleAdapter extends ArrayAdapter<String> {
                 position % mBackgroundColors.size() : position;
 
         convertView.setBackgroundResource(mBackgroundColors.get(backgroundIndex));
-
-        Log.d(TAG, "getView position:" + position + " h:" + positionHeight);
-
         vh.txtLineOne.setHeightRatio(positionHeight);
-        vh.txtLineOne.setText(getItem(position) + position);
+        final Contact contact = contact1.get(position);
 
-//        vh.btnGo.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(final View v) {
-//                Toast.makeText(getContext(), "Button Clicked Position " +
-//                        position, Toast.LENGTH_SHORT).show();
-//            }
-//        });
+
+        if (contact.get_Name().isEmpty()) {
+
+            vh.txtLineOne.setText(contact.get_phoneNumber());
+
+        } else {
+            //   .replaceAll("[^a-zA-Z0-9]", "")
+            vh.txtLineOne.setText(contact.get_Name());
+        }
+
+
+        vh.btnGo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+
+
+                int deleteContact = dataBaseHelper.deleteContact(contact.get_phoneNumber());
+
+                if (deleteContact != 0) {
+
+                    Toast.makeText(getContext(), " Delete "
+                            , Toast.LENGTH_SHORT).show();
+                    updateReceiptsList();
+
+                } else {
+                    Toast.makeText(getContext(), " Unable to Delete "
+                            , Toast.LENGTH_SHORT).show();
+                }
+
+
+            }
+        });
+
 
         return convertView;
     }
 
     private double getPositionRatio(final int position) {
         double ratio = sPositionHeightRatios.get(position, 0.0);
-        // if not yet done generate and stash the columns height
-        // in our real world scenario this will be determined by
-        // some match based on the known height and width of the image
-        // and maybe a helpful way to get the column height!
+
         if (ratio == 0) {
             ratio = getRandomHeightRatio();
             sPositionHeightRatios.append(position, ratio);
@@ -100,6 +141,13 @@ public class SampleAdapter extends ArrayAdapter<String> {
 
     static class ViewHolder {
         DynamicHeightTextView txtLineOne;
+        TextView textView;
         ImageView btnGo;
     }
 }
+
+
+
+
+
+

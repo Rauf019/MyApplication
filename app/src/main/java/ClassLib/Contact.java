@@ -4,23 +4,31 @@ public class Contact {
     String _Name;
     String _phoneNumber;
 
-    boolean _is_Call_block, _is_Msg_block;
+    boolean _is_Call_block;
+    boolean _is_Msg_block;
+    private String photo;
 
 
     public Contact(String _phoneNumber, String _Name, boolean _is_Call_block,
-                   boolean _is_Msg_block) {
+                   boolean _is_Msg_block, String photo) {
 
         this._phoneNumber = _phoneNumber;
         this._Name = _Name;
         this._is_Call_block = _is_Call_block;
         this._is_Msg_block = _is_Msg_block;
 
+        this.photo = photo;
+    }
+
+
+    public Contact(String _phoneNumber, String _Name) {
+        this._phoneNumber = _phoneNumber;
+        this._Name = _Name;
     }
 
     public Contact() {
-        // TODO Auto-generated constructor stub
-    }
 
+    }
 
     public String get_Name() {
         return _Name;
@@ -55,4 +63,11 @@ public class Contact {
     }
 
 
+    public String getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
+    }
 }

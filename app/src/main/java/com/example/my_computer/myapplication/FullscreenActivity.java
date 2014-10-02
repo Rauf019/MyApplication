@@ -2,16 +2,21 @@ package com.example.my_computer.myapplication;
 
 import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,10 +24,7 @@ import java.util.List;
 public class FullscreenActivity extends Activity {
 
     public static Custum_Class custum_class;
-//    public static List<Read_sms> List_Read_sms;
-//    public static List<Read_call_log> List_Read_call_logs;
-//    public static List<Read_contacts> List_Read_contacts;
-    // boolean is_completed = false;
+
 
     @Override
     protected void onPause() {
@@ -31,6 +33,13 @@ public class FullscreenActivity extends Activity {
         this.finish();
 
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     @Override
@@ -88,13 +97,9 @@ public class FullscreenActivity extends Activity {
                 ArrayList<Read_contacts> List_Read_contacts = null;
                 ArrayList<Read_call_log> List_Read_call_logs = null;
 
-
                 List_Read_sms = new ArrayList<Read_sms>();
-                Uri message = Uri.parse("content://sms/");
-
-
                 ContentResolver cr = getApplicationContext().getContentResolver();
-                Cursor cursor = cr.query(message, null, null, null, null);
+                Cursor cursor = cr.query(Uri.parse("content://sms/"), null, null, null, null);
                 Cursor cursor1 = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null,
                         ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
                 Cursor cursor2 = cr.query(Uri.parse("content://call_log/calls"),
@@ -131,16 +136,19 @@ public class FullscreenActivity extends Activity {
 
 
                 do {
+
+                    //   cursor1.getString(cursor1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_URI))
+
                     List_Read_contacts.add(new Read_contacts(cursor1.getString(cursor1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)),
-                            cursor1.getString(cursor1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))));
+                            cursor1.getString(cursor1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)), cursor1
+                            .getString(cursor1
+                                    .getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID))));
                     onProgressUpdate(dec_count++);
+
+
                 }
                 while (cursor1.moveToNext());
-
-
                 cursor1.close();
-
-
                 List_Read_call_logs = new ArrayList<Read_call_log>();
 
                 do {
@@ -155,46 +163,61 @@ public class FullscreenActivity extends Activity {
 
                 cursor2.close();
 
-                return custum_class = new Custum_Class(List_Read_sms, List_Read_call_logs, List_Read_contacts);
+                return new Custum_Class(List_Read_sms, List_Read_call_logs, List_Read_contacts);
 
 
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            } catch (OutOfMemoryError e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+
+                Toast.makeText(getApplicationContext(), "Unable to get Data", Toast.LENGTH_SHORT).show();
+                return custum_class;
+
             }
 
-            return null;
+
         }
 
         @Override
         protected void onPostExecute(Custum_Class aClass) {
 
+
             super.onPostExecute(aClass);
 
-
+            custum_class = aClass;
             Intent intent
                     = new Intent(getApplicationContext(), MyActivity.class);
 
-
             startActivity(intent);
 
+        }
 
+        public Bitmap loadContactPhoto(ContentResolver cr, long id) {
+
+            Uri uri = ContentUris.withAppendedId(
+                    ContactsContract.Contacts.CONTENT_URI, id);
+
+
+            InputStream input = ContactsContract.Contacts
+                    .openContactPhotoInputStream(cr, uri);
+            if (input == null) {
+                return null;
+            }
+            return BitmapFactory.decodeStream(input);
         }
     }
 
     class Custum_Class {
 
-
         List<Read_sms> read_smses;
         List<Read_call_log> read_call_logs;
         List<Read_contacts> read_contactses;
+
 
         public Custum_Class(List<Read_sms> read_smses, List<Read_call_log> read_call_logs, List<Read_contacts> read_contactses) {
             this.read_smses = read_smses;
             this.read_call_logs = read_call_logs;
             this.read_contactses = read_contactses;
         }
+
 
         public List<Read_sms> getRead_smses() {
             return read_smses;
@@ -219,100 +242,14 @@ public class FullscreenActivity extends Activity {
         public void setRead_contactses(List<Read_contacts> read_contactses) {
             this.read_contactses = read_contactses;
         }
+
+
     }
-
-//    public void Read_Call_Log(Context context) {
-//
-//
-//        try {
-//            if (List_Read_call_logs == null) {
-//                List_Read_call_logs = new ArrayList<Read_call_log>();
-//
-//
-//                Cursor cursor = context.getContentResolver().query(Uri.parse("content://call_log/calls"), null, null, null, null);
-//
-//                if (cursor != null) {
-//                    cursor.moveToFirst();
-//                    do {
-//                        List_Read_call_logs.add(new Read_call_log(cursor.getString(cursor.getColumnIndex(CallLog.Calls.CACHED_NAME)),
-//                                cursor.getString(cursor.getColumnIndex(CallLog.Calls.NUMBER)),
-//                                Integer.parseInt(cursor.getString(cursor.getColumnIndex(CallLog.Calls.TYPE))
-//                                )));
-//
-//                    }
-//                    while (cursor.moveToNext());
-//                    cursor.close();
-//
-//                }
-//
-//
-//            }
-//        } catch (NullPointerException e) {
-//            e.printStackTrace();
-//        }
-//
-//
-//    }
-//
-//    public void Read_Contact(Context context) {
-//
-//
-//        if (List_Read_contacts == null) {
-//
-//            DataBaseHelper dataBaseHelper = new DataBaseHelper(context);
-//            List_Read_contacts = new ArrayList<Read_contacts>();
-//            Cursor cursor = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
-//            while (cursor.moveToNext()) {
-//
-//                List_Read_contacts.add(new Read_contacts(cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)),
-//                        cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))));
-//
-//
-//            }
-//            cursor.close();
-//            is_completed = true;
-//
-//        }
-//
-//
-//    }
-
-
-    //    public void Read_Sms(Context context) {
-//
-//        try {
-//
-//            if (List_Read_sms == null) {
-//                List_Read_sms = new ArrayList<Read_sms>();
-//                Uri message = Uri.parse("content://sms/");
-//                ContentResolver cr = context.getContentResolver();
-//                Cursor cursor = cr.query(message, null, null, null, null);
-//                cursor.moveToFirst();
-//                do {
-//                    String person = cursor.getString(cursor
-//                            .getColumnIndex("address"));
-//
-//                    String lookup = get_lookup(context, person);
-//
-//                    List_Read_sms.add(new Read_sms(lookup,
-//                            cursor.getString(cursor.getColumnIndexOrThrow("body")),
-//                            Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow("type")))));
-//                }
-//                while (cursor.moveToNext());
-//                cursor.close();
-//
-//            }
-//
-//        } catch (NullPointerException e) {
-//            e.printStackTrace();
-//        } catch (OutOfMemoryError e) {
-//            e.printStackTrace();
-//        }
-//
-//    }
-
-
 }
+
+
+
+
 
 
 

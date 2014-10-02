@@ -7,47 +7,52 @@
         android:id="@+id/back"
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:tag="back">
+        android:tag="back"
+
+
+        >
 
         <ImageView
             android:id="@+id/swipe_button1"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_margin="3dp"
-            android:layout_weight="1"
-            android:background="@drawable/msgs" />
+            android:layout_gravity="center"
+            android:layout_marginLeft="25dp"
+            android:background="@drawable/call" />
 
         <ImageView
             android:id="@+id/swipe_button2"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_marginLeft="25dp"
+            android:background="@drawable/call" />
 
-            android:layout_margin="3dp"
-            android:layout_weight="1"
-            android:background="@drawable/msgs" />
 
         <ImageView
             android:id="@+id/swipe_button3"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:layout_margin="1dp"
-            android:background="@android:drawable/ic_menu_close_clear_cancel" />
+            android:layout_marginLeft="25dp"
+            android:background="@drawable/call" />
+
 
     </LinearLayout>
 
     <RelativeLayout
         android:id="@+id/front"
-        style="@style/MyListFrontContent"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
 
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="#fff"
         android:tag="front">
 
         <ClassLib.LetterImageView
             android:id="@+id/iv_avatar"
             android:layout_width="67dp"
             android:layout_height="67dp"
+            android:layout_centerVertical="true"
             android:layout_margin="4dp" />
 
         <TextView
@@ -64,6 +69,7 @@
             android:textSize="18sp"
             android:textStyle="normal"
             android:typeface="sans" />
+
 
     </RelativeLayout>
 
