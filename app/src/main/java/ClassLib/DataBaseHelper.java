@@ -3,11 +3,8 @@ package ClassLib;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,22 +41,23 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 + " BOOLEAN, " + IS_MSG_BLOCK + " BOOLEAN ," + PHOTO + " VARCHAR " + ");";
 
 
-        Log.d("TAG", CREATE_CONTACTS_TABLE);
         db.execSQL(CREATE_CONTACTS_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Drop older table if existed
+
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_CONTACTS);
 
-        // Create tables again
+
         onCreate(db);
     }
 
     public void addContact(Contact contact) {
 
         try {
+
+
             SQLiteDatabase db = this.getWritableDatabase();
             ContentValues values = new ContentValues();
             values.put(PHONE_NUMBER, contact.get_phoneNumber());
@@ -67,12 +65,14 @@ public class DataBaseHelper extends SQLiteOpenHelper {
             values.put(IS_CALL_BLOCK, contact.get_is_Call_block());
             values.put(IS_MSG_BLOCK, contact.get_is_Msg_block());
             values.put(PHOTO, contact.getPhoto());
-            long insert = db.insert(TABLE_CONTACTS, null, values);
-            if (insert != -1) {
-                Toast.makeText(context, "Successfully Added", Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(context, "Unable to Added", Toast.LENGTH_LONG).show();
-            }
+
+
+            db.insert(TABLE_CONTACTS, null, values);
+//            if (insert != -1) {
+//                Toast.makeText(context, "Successfully Added", Toast.LENGTH_LONG).show();
+//            } else {
+//                Toast.makeText(context, "Unable to Added", Toast.LENGTH_LONG).show();
+//            }
             db.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -83,7 +83,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
         Contact contact = null;
         try {
-
 
             SQLiteDatabase db = this.getReadableDatabase();
             contact = new Contact();
@@ -96,21 +95,21 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
 
             do {
+
                 contact.set_phoneNumber(cursor.getString(0));
                 contact.set_Name(cursor.getString(1));
-
                 contact.set_is_Call_block(stringToBool(cursor.getString(2)));
-
                 contact.set_is_Msg_block(stringToBool(cursor.getString(3)));
+                contact.setPhoto(cursor.getString(4));
+
             } while (cursor.moveToNext());
 
-            db.close();
             cursor.close();
+            db.close();
             return contact;
 
         } catch (Exception e) {
 
-            String message = e.getMessage();
             return contact;
         }
 
@@ -128,7 +127,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
             String sql_statement = "SELECT * FROM " + TABLE_CONTACTS + " WHERE " + val + " = " + " 1 ";
             Cursor cursor = db.rawQuery(sql_statement, null);
-
             cursor.moveToFirst();
 
             do {
@@ -141,15 +139,10 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 contactList.add(contact);
             } while (cursor.moveToNext());
 
-            db.close();
             cursor.close();
+            db.close();
             return contactList;
-        } catch (CursorIndexOutOfBoundsException e) {
-
-            String message = e.getMessage();
-
-            return contactList;
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
 
             String message = e.getMessage();
 
@@ -179,13 +172,13 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
             } while (cursor.moveToNext());
 
-            db.close();
             cursor.close();
+            db.close();
             return contactList;
 
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+
+
             return contactList;
         }
     }
@@ -198,7 +191,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         try {
             contactList = new ArrayList<Contact>();
 
-            String sql_statement = "SELECT * FROM " + TABLE_CONTACTS + " WHERE " + IS_CALL_BLOCK + " != " + " 0 " + " AND " + IS_MSG_BLOCK + " != " + " 0 ";
+            String sql_statement = "SELECT * FROM " + TABLE_CONTACTS + " WHERE " + IS_CALL_BLOCK + " != " + " 0 " + " OR " + IS_MSG_BLOCK + " != " + " 0 ";
 
             SQLiteDatabase db = this.getWritableDatabase();
             Cursor cursor = db.rawQuery(sql_statement, null);
@@ -211,8 +204,8 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
             } while (cursor.moveToNext());
 
-            db.close();
             cursor.close();
+            db.close();
             return contactList;
 
         } catch (Exception e) {
@@ -256,6 +249,16 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     }
 
     public int deleteContact(String val) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int delete = db.delete(TABLE_CONTACTS, PHONE_NUMBER + " = ?",
+                new String[]{String.valueOf(val)});
+
+
+        db.close();
+        return delete;
+    }
+
+    public int deleteContact_sort(String val) {
         SQLiteDatabase db = this.getWritableDatabase();
         int delete = db.delete(TABLE_CONTACTS, PHONE_NUMBER + " = ?",
                 new String[]{String.valueOf(val)});

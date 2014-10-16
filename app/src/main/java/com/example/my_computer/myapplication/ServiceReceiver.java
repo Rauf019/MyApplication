@@ -31,25 +31,18 @@ public class ServiceReceiver extends BroadcastReceiver {
 
     List<Contact> contacts;
     Context context;
-    private List<messageData> datas;
-    private String id;
-    private String add;
     private TelephonyManager telephony;
     private SmsMessage[] msgs;
 
     public void onReceive(Context context, Intent intent) {
+
         this.context = context;
-        telephony = (TelephonyManager) context
-
-                .getSystemService(Context.TELEPHONY_SERVICE);
-
-//        MainActivity.baseHelper.addContact(new Contact("033", "true", "true",
-//                "true"));
-//        List<Contact> contacts = MainActivity.baseHelper.getAllContacts();
+        telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 
         Sms(intent, contacts);
 
         MyPhoneStateListener listener = new MyPhoneStateListener();
+
         telephony.listen(listener, PhoneStateListener.LISTEN_CALL_STATE);
 
     }

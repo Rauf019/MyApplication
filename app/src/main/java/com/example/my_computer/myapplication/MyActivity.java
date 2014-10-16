@@ -1,18 +1,22 @@
 package com.example.my_computer.myapplication;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,27 +26,29 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.etsy.android.grid.StaggeredGridView;
-import com.fortysevendeg.swipelistview.BaseSwipeListViewListener;
-import com.fortysevendeg.swipelistview.SwipeListView;
 
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Queue;
 
 import ClassLib.Contact;
 import ClassLib.DataBaseHelper;
 import ClassLib.LetterImageView;
+import ClassLib.SampleAdapter;
 
 
 public class MyActivity extends ActionBarActivity implements ActionBar.TabListener {
 
 
-    public static FullscreenActivity.Custum_Class Loc_custum_class = FullscreenActivity.custum_class;
-
-
+    public static FullscreenActivity.Custum_Class Loc_custum_class;
+    static FragmentManager supportFragmentManager;
     SectionsPagerAdapter mSectionsPagerAdapter;
     ViewPager mViewPager;
 
@@ -50,37 +56,61 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_my);
+
+        Loc_custum_class = FullscreenActivity.custum_class;
+        supportFragmentManager = getSupportFragmentManager();
+        if (Loc_custum_class == null) {
+
+            startActivity(new Intent(this, FullscreenActivity.class));
+
+        } else if (Loc_custum_class.is_intialize) {
+            setContentView(R.layout.activity_my);
 
 
-//        boolean call_blocker = getApplication().deleteDatabase("Call_blocker");
+            final ActionBar actionBar = getSupportActionBar();
+            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+            mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+            //   getApplicationContext().deleteDatabase("Call_blocker");
+            mViewPager = (ViewPager) findViewById(R.id.pager);
+            mViewPager.setAdapter(mSectionsPagerAdapter);
+            mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+                @Override
+                public void onPageSelected(int position) {
 
-        final ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
-        mViewPager = (ViewPager) findViewById(R.id.pager);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
+                    actionBar.setSelectedNavigationItem(position);
+                    mSectionsPagerAdapter.notifyDataSetChanged();
+                }
+            });
 
 
-        mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-            @Override
-            public void onPageSelected(int position) {
-                actionBar.setSelectedNavigationItem(position);
+            for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
+
+                actionBar.addTab(
+                        actionBar.newTab()
+                                .setText(mSectionsPagerAdapter.getPageTitle(i))
+                                .setTabListener(this)
+                );
             }
-        });
 
 
-        for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
-
-            actionBar.addTab(
-                    actionBar.newTab()
-                            .setText(mSectionsPagerAdapter.getPageTitle(i))
-                            .setTabListener(this)
-            );
         }
+
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+
+
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -91,9 +121,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             return true;
@@ -117,17 +145,12 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
     }
 
-    enum Value_Type {
-
-        MSG, CALL
-
-    }
-
     public static class Contact_Frag extends Fragment {
         private static final String ARG_SECTION_NUMBER = "section_number";
         static int pre_loc;
         static boolean pre_loc_val;
-        Contact_Adapter myArrayAdapter = null;
+        Adapter myArrayAdapter = null;
+        DataBaseHelper dataBaseHelper;
 
         public static Contact_Frag newInstance(int sectionNumber) {
             Contact_Frag fragment = new Contact_Frag();
@@ -143,93 +166,111 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
 
             View rootView = inflater.inflate(R.layout.list, container, false);
-
-            final SwipeListView swipelistview = (SwipeListView) rootView.findViewById(R.id.example_swipe_lv_list);
-
+            dataBaseHelper = new DataBaseHelper(getActivity());
+//            final SwipeListView swipelistview = (SwipeListView) rootView.findViewById(R.id.example_swipe_lv_list);
+            ListView listView = (ListView) rootView.findViewById(R.id.listView);
 
             if (Loc_custum_class.getRead_contactses() != null) {
 
 
-                Contact_Adapter adapter = new Contact_Adapter(getActivity(), Loc_custum_class.getRead_contactses());
+                Adapter adapter = new Adapter(getActivity(), Loc_custum_class.getRead_contactses());
 
-
-                swipelistview.setSwipeListViewListener(new BaseSwipeListViewListener() {
+                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
-                    public void onOpened(int position, boolean toRight) {
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
 
-                    }
+                        final Read_contacts itemAtPosition = (Read_contacts) parent.getItemAtPosition(position);
 
-                    @Override
-                    public void onClosed(int position, boolean fromRight) {
+                        Contact contact = dataBaseHelper.getContact(itemAtPosition.getNumber());
 
-                    }
+                        if (contact.get_phoneNumber() == null) {
 
-                    @Override
-                    public void onListChanged() {
-
-
-                    }
-
-                    @Override
-                    public void onMove(int position, float x) {
-
-                    }
-
-                    @Override
-                    public void onStartOpen(int position, int action, boolean right) {
-                        Log.d("swipe", String.format("onStartOpen %d - action %d", position, action));
-
-
-                    }
-
-                    @Override
-                    public void onStartClose(int position, boolean right) {
-                        Log.d("swipe", String.format("onStartClose %d", position));
-
-                        pre_loc = 0;
-
-                        pre_loc_val = true;
-                    }
-
-                    @Override
-                    public void onClickFrontView(int position) {
-
-                        if (pre_loc_val == false) {
-
-                            swipelistview.closeAnimate(pre_loc);
-
-
-                        } else {
-
-                            pre_loc = position;
-                            swipelistview.openAnimate(position);
-
+                            dataBaseHelper.addContact(new Contact(itemAtPosition.getNumber(), itemAtPosition.getName()));
                         }
-                        //when you touch front view it will open
+
+                        final Contact contact1 = dataBaseHelper.getContact(itemAtPosition.getNumber());
+
+                        final HashMap<String, Boolean> hashMap = new HashMap<String, Boolean>(); // Where we track the selected items
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        final boolean is_call = false,
+                                is_msg = false,
+                                is_both = false;
+                        String[] toppings = {"Call", "Message", "Both"};
+                        builder.setTitle("Block")
+
+                                .setMultiChoiceItems(toppings, null,
+                                        new DialogInterface.OnMultiChoiceClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which,
+                                                                boolean isChecked) {
 
 
+                                                switch (which) {
+
+                                                    case 0:
+
+                                                        if (isChecked) {
+
+                                                            hashMap.put("Call", true);
+                                                        }
+
+                                                        break;
+                                                    case 1:
+                                                        if (isChecked) {
+                                                            hashMap.put("Msg", true);
+                                                        }
+                                                        break;
+                                                    case 2:
+
+                                                        if (isChecked) {
+                                                            hashMap.put("Both", true);
+                                                        }
+                                                        break;
+                                                }
+
+
+                                            }
+                                        })
+                                        // Set the action buttons
+                                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int id) {
+
+
+                                        Boolean both = hashMap.get("Both") != null ? hashMap.get("Both") : false;
+                                        Boolean call = hashMap.get("Call") != null ? hashMap.get("Call") : false;
+                                        Boolean msg = hashMap.get("Msg") != null ? hashMap.get("Msg") : false;
+
+                                        if (both) {
+
+                                            dataBaseHelper.updateContact(new Contact(itemAtPosition.getNumber(),
+                                                    itemAtPosition.getName(), true, true, itemAtPosition.getPhoto()));
+                                            List<Contact> allContacts = dataBaseHelper.getAllContacts();
+                                        } else {
+                                            dataBaseHelper.updateContact(new Contact(itemAtPosition.getNumber(),
+                                                    itemAtPosition.getName(), call, msg, itemAtPosition.getPhoto()));
+                                            List<Contact> allContacts = dataBaseHelper.getAllContacts();
+                                        }
+                                    }
+                                })
+                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int id) {
+
+
+                                    }
+                                });
+                        builder.show();
+
+
+//
                     }
-
-
-
-                    @Override
-                    public void onClickBackView(int position) {
-
-
-                        swipelistview.closeAnimate(position);//when you touch back view it will close
-                    }
-
-                    @Override
-                    public void onDismiss(int[] reverseSortedPositions) {
-
-                    }
-
                 });
 
-                swipelistview.setSwipeMode(SwipeListView.SWIPE_MODE_DEFAULT);
-                swipelistview.setAnimationTime(300);
-                swipelistview.setAdapter(adapter);
+
+                listView.setAdapter(adapter);
+
 
             }
 
@@ -238,169 +279,14 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
         }
 
-        @Override
-        public void onSaveInstanceState(Bundle outState) {
-            super.onSaveInstanceState(outState);
-
-
-        }
-
-        public int convertDpToPixel(float dp) {
-            DisplayMetrics metrics = getResources().getDisplayMetrics();
-            float px = dp * (metrics.densityDpi / 160f);
-            return (int) px;
-        }
-
-
-        class Contact_Adapter extends ArrayAdapter<Read_contacts> {
-            private final Activity context;
-            private final List<Read_contacts> names;
-            DataBaseHelper dataBaseHelper;
-
-            public Contact_Adapter(Activity context, List<Read_contacts> names) {
-
-                super(context, android.R.layout.simple_list_item_1, names);
-                dataBaseHelper = new DataBaseHelper(getContext());
-                this.context = context;
-                this.names = names;
-
-
-            }
-
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                LayoutInflater inflater;
-
-                View rowView = convertView;
-                if (rowView == null) {
-                    inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    rowView = inflater.inflate(R.layout.custom_row, null);
-                    ViewHolder viewHolder = new ViewHolder();
-                    viewHolder.name = (TextView) rowView.findViewById(R.id.name);
-                    viewHolder.letterImageView = (LetterImageView) rowView.findViewById(R.id.iv_avatar);
-//                    viewHolder.letterImageView.setOval(true);
-                    viewHolder.button1 = (ImageView) rowView.findViewById(R.id.swipe_button1);
-                    viewHolder.button2 = (ImageView) rowView.findViewById(R.id.swipe_button2);
-                    viewHolder.button3 = (ImageView) rowView.findViewById(R.id.swipe_button3);
-                    rowView.setTag(viewHolder);
-
-                }
-
-
-                final Read_contacts read_contacts = names.get(position);
-                ViewHolder viewHolder = (ViewHolder) rowView.getTag();
-                viewHolder.name.setText(read_contacts.getName());
-
-                viewHolder.letterImageView.setLetter(read_contacts.getName().charAt(0));
-                viewHolder.button1.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Contact contact;
-
-                        if (v.isPressed()) {
-
-                            contact = dataBaseHelper.getContact(read_contacts.getNumber());
-                            if (contact.get_phoneNumber() != null) {
-                                Toast.makeText(context, "Already Added", Toast.LENGTH_LONG).show();
-                                update(contact, read_contacts, Value_Type.CALL);
-                            } else {
-
-                                dataBaseHelper.addContact(new Contact(read_contacts.getNumber(), read_contacts.getName()));
-                                contact = dataBaseHelper.getContact(read_contacts.getNumber());
-                                update(contact, read_contacts, Value_Type.CALL);
-                            }
-
-                        }
-
-
-                    }
-
-
-                });
-                viewHolder.button2.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Contact contact;
-
-                        if (v.isPressed()) {
-                            contact = dataBaseHelper.getContact(read_contacts.getNumber());
-                            if (contact.get_phoneNumber() != null) {
-                                update(contact, read_contacts, Value_Type.MSG);
-                            } else {
-                                dataBaseHelper.addContact(new Contact(read_contacts.getNumber(), read_contacts.getName()));
-
-                                contact = dataBaseHelper.getContact(read_contacts.getNumber());
-                                update(contact, read_contacts, Value_Type.MSG);
-                            }
-
-                        }
-
-                    }
-
-                });
-
-                viewHolder.button3.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Contact contact;
-
-                        if (v.isPressed()) {
-
-
-                        }
-
-                    }
-
-                });
-                return rowView;
-            }
-
-            private void update(Contact contact, Read_contacts read_contacts, Value_Type Type) {
-
-                boolean is_call_block = contact.get_is_Call_block();
-                boolean is_msg_block = contact.get_is_Msg_block();
-
-
-                switch (Type) {
-
-                    case CALL:
-
-                        dataBaseHelper.updateContact(new Contact(read_contacts.getNumber(), read_contacts.getName(), !(is_call_block), is_msg_block, read_contacts.getPhoto()));
-
-                        break;
-                    case MSG:
-                        dataBaseHelper.updateContact(new Contact(read_contacts.getNumber(), read_contacts.getName(), is_call_block, !(is_msg_block), read_contacts.getPhoto()));
-
-                        break;
-
-                }
-                List<Contact> allContacts = dataBaseHelper.getAllContacts();
-            }
-
-
-        }
-    }
-
-    static class ViewHolder {
-        ImageView button1;
-        ImageView button2;
-        ImageView button3;
-        TextView name;
-        TextView number;
-        LetterImageView letterImageView;
 
     }
-
 
     public static class Call_log_Frag extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-        Call_log_Adapter myArrayAdapter = null;
 
+        private static final String ARG_SECTION_NUMBER = "section_number";
+        Adapter adapter = null;
+        DataBaseHelper dataBaseHelper;
 
         public static Call_log_Frag newInstance(int sectionNumber) {
             Call_log_Frag fragment = new Call_log_Frag();
@@ -415,160 +301,114 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
 
-
+            dataBaseHelper = new DataBaseHelper(getActivity());
             View rootView = inflater.inflate(R.layout.list, container, false);
-            final SwipeListView swipelistview = (SwipeListView) rootView.findViewById(R.id.example_swipe_lv_list);
+            ListView listView = (ListView) rootView.findViewById(R.id.listView);
 
             if (Loc_custum_class.getRead_call_logs() != null) {
-                myArrayAdapter = new Call_log_Adapter(getActivity(), Loc_custum_class.getRead_call_logs());
+                adapter = new Adapter(getActivity(), Loc_custum_class.getRead_call_logs());
 
 
-                swipelistview.setSwipeListViewListener(new BaseSwipeListViewListener() {
-                    @Override
-                    public void onOpened(int position, boolean toRight) {
-
-
-                    }
-
-                    @Override
-                    public void onClosed(int position, boolean fromRight) {
-                    }
-
-                    @Override
-                    public void onListChanged() {
-
-
-                    }
-
-                    @Override
-                    public void onMove(int position, float x) {
-                    }
-
-                    @Override
-                    public void onStartOpen(int position, int action, boolean right) {
-                        Log.d("swipe", String.format("onStartOpen %d - action %d", position, action));
-                    }
-
-                    @Override
-                    public void onStartClose(int position, boolean right) {
-                        Log.d("swipe", String.format("onStartClose %d", position));
-                    }
-
-                    @Override
-                    public void onClickFrontView(int position) {
-                        Log.d("swipe", String.format("onClickFrontView %d", position));
-
-
-                        swipelistview.openAnimate(position); //when you touch front view it will open
-
-
-                    }
-
-                    @Override
-                    public void onClickBackView(int position) {
-                        Log.d("swipe", String.format("onClickBackView %d", position));
-
-                        swipelistview.closeAnimate(position);//when you touch back view it will close
-                    }
-
-                    @Override
-                    public void onDismiss(int[] reverseSortedPositions) {
-
-                    }
-
-                });
-                swipelistview.setSwipeMode(SwipeListView.SWIPE_MODE_DEFAULT); // there are five swiping modes
-
-//           swipelistview.setOffsetLeft(convertDpToPixel(0f));
-//            swipelistview.setOffsetRight(convertDpToPixel(80f));
-                swipelistview.setAnimationTime(300); // Animation time
-                swipelistview.setSwipeOpenOnLongPress(true); // enable or disable SwipeOpenOnLongPress
-
-//                swipelistview.notifyDataSetChanged();
-                swipelistview.setAdapter(myArrayAdapter);
             }
+
+
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+
+                    final Read_contacts itemAtPosition = (Read_contacts) parent.getItemAtPosition(position);
+
+
+                    Contact contact = dataBaseHelper.getContact(itemAtPosition.getNumber());
+
+                    if (contact.get_phoneNumber() == null) {
+
+                        dataBaseHelper.addContact(new Contact(itemAtPosition.getNumber(), itemAtPosition.getName()));
+                    }
+
+
+                    final HashMap<String, Boolean> hashMap = new HashMap<String, Boolean>(); // Where we track the selected items
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+                    String[] toppings = {"Call", "Message", "Both"};
+                    builder.setTitle("Block")
+
+                            .setMultiChoiceItems(toppings, null,
+                                    new DialogInterface.OnMultiChoiceClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which,
+                                                            boolean isChecked) {
+
+
+                                            switch (which) {
+
+                                                case 0:
+
+                                                    if (isChecked) {
+
+                                                        hashMap.put("Call", true);
+                                                    }
+
+                                                    break;
+                                                case 1:
+                                                    if (isChecked) {
+                                                        hashMap.put("Msg", true);
+                                                    }
+                                                    break;
+                                                case 2:
+
+                                                    if (isChecked) {
+                                                        hashMap.put("Both", true);
+                                                    }
+                                                    break;
+                                            }
+
+
+                                        }
+                                    })
+                                    // Set the action buttons
+                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id) {
+
+
+                                    Boolean both = hashMap.get("Both") != null ? hashMap.get("Both") : false;
+                                    Boolean call = hashMap.get("Call") != null ? hashMap.get("Call") : false;
+                                    Boolean msg = hashMap.get("Msg") != null ? hashMap.get("Msg") : false;
+
+                                    if (both) {
+
+                                        dataBaseHelper.updateContact(new Contact(itemAtPosition.getNumber(),
+                                                itemAtPosition.getName(), true, true, itemAtPosition.getPhoto()));
+
+                                    } else {
+                                        dataBaseHelper.updateContact(new Contact(itemAtPosition.getNumber(),
+                                                itemAtPosition.getName(), call, msg, itemAtPosition.getPhoto()));
+
+                                    }
+                                }
+                            })
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id) {
+
+
+                                }
+                            });
+                    builder.show();
+
+
+//
+                }
+            });
+
+
+            listView.setAdapter(adapter);
 
 
             return rootView;
-        }
 
-        @Override
-        public void onResume() {
-            super.onResume();
-        }
-
-        @Override
-        public void onPause() {
-            super.onPause();
-        }
-
-
-        class Call_log_Adapter extends ArrayAdapter<Read_call_log> {
-            private final Activity context;
-            private final List<Read_call_log> names;
-
-            public Call_log_Adapter(Activity context, List<Read_call_log> names) {
-
-                super(context, android.R.layout.simple_list_item_1, names);
-                this.context = context;
-                this.names = names;
-
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                LayoutInflater inflater;
-
-                View rowView = convertView;
-                if (rowView == null) {
-                    inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    rowView = inflater.inflate(R.layout.custom_row, null);
-                    ViewHolder viewHolder = new ViewHolder();
-                    viewHolder.name = (TextView) rowView.findViewById(R.id.name);
-                    viewHolder.letterImageView = (LetterImageView) rowView.findViewById(R.id.iv_avatar);
-
-                    viewHolder.button1 = (ImageView) rowView.findViewById(R.id.swipe_button1);
-                    viewHolder.button2 = (ImageView) rowView.findViewById(R.id.swipe_button2);
-
-                    rowView.setTag(viewHolder);
-                }
-
-                Read_call_log s = names.get(position);
-                ViewHolder viewHolder = (ViewHolder) rowView.getTag();
-                viewHolder.name.setText(s.getName());
-                viewHolder.letterImageView.setLetter(s.getName().charAt(0));
-                viewHolder.button1.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        // TODO Auto-generated method stub
-                        Toast.makeText(context, "Button 1 Clicked", Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-                viewHolder.button2.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        // TODO Auto-generated method stub
-                        Toast.makeText(context, "Button 2 Clicked", Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-
-                return rowView;
-            }
-
-
-            class ViewHolder {
-                ImageView button1;
-                ImageView button2;
-                ImageView button3;
-                TextView name;
-                TextView number;
-                LetterImageView letterImageView;
-
-            }
 
         }
 
@@ -600,7 +440,53 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_my, container, false);
+            final ImageView imageView = (ImageView) rootView.findViewById(R.id.imageView);
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    imageView.setBackgroundColor(Color.GREEN);
+
+                }
+            });
+//            Bitmap bitmap
+//                    = BitmapFactory.decodeResource(getActivity().getResources(),R.drawable.power);
             return rootView;
+        }
+
+
+        private void FloodFill(Bitmap bmp, Point pt, int targetColor, int replacementColor) {
+
+
+            Queue<Point> q = new LinkedList<Point>();
+            q.add(pt);
+            while (q.size() > 0) {
+                Point n = q.poll();
+                if (bmp.getPixel(n.x, n.y) != targetColor)
+                    continue;
+
+                Point w = n, e = new Point(n.x + 1, n.y);
+                while ((w.x > 0) && (bmp.getPixel(w.x, w.y) == targetColor)) {
+                    bmp.setPixel(w.x, w.y, replacementColor);
+                    if ((w.y > 0) && (bmp.getPixel(w.x, w.y - 1) == targetColor))
+                        q.add(new Point(w.x, w.y - 1));
+                    if ((w.y < bmp.getHeight() - 1)
+                            && (bmp.getPixel(w.x, w.y + 1) == targetColor))
+                        q.add(new Point(w.x, w.y + 1));
+                    w.x--;
+                }
+                while ((e.x < bmp.getWidth() - 1)
+                        && (bmp.getPixel(e.x, e.y) == targetColor)) {
+                    bmp.setPixel(e.x, e.y, replacementColor);
+
+                    if ((e.y > 0) && (bmp.getPixel(e.x, e.y - 1) == targetColor))
+                        q.add(new Point(e.x, e.y - 1));
+                    if ((e.y < bmp.getHeight() - 1)
+                            && (bmp.getPixel(e.x, e.y + 1) == targetColor))
+                        q.add(new Point(e.x, e.y + 1));
+                    e.x++;
+                }
+            }
         }
     }
 
@@ -610,7 +496,8 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
-        Message_Frag_Adapter myArrayAdapter = null;
+        Adapter adapter = null;
+        DataBaseHelper dataBaseHelper;
 
         /**
          * Returns a new instance of this fragment for the given section
@@ -624,78 +511,121 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
             return fragment;
         }
 
-
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
 
-
+            dataBaseHelper = new DataBaseHelper(getActivity());
             View rootView = inflater.inflate(R.layout.list, container, false);
-            final SwipeListView swipelistview = (SwipeListView) rootView.findViewById(R.id.example_swipe_lv_list);
 
+            ListView listView = (ListView) rootView.findViewById(R.id.listView);
             if (Loc_custum_class.getRead_smses() != null) {
-                myArrayAdapter = new Message_Frag_Adapter(getActivity(), Loc_custum_class.getRead_smses());
-                swipelistview.setSwipeListViewListener(new BaseSwipeListViewListener() {
-                    @Override
-                    public void onOpened(int position, boolean toRight) {
+                adapter = new Adapter(getActivity(), Loc_custum_class.getRead_smses());
 
-
-                    }
-
-                    @Override
-                    public void onClosed(int position, boolean fromRight) {
-                    }
-
-                    @Override
-                    public void onListChanged() {
-
-
-                    }
-
-                    @Override
-                    public void onMove(int position, float x) {
-                    }
-
-                    @Override
-                    public void onStartOpen(int position, int action, boolean right) {
-                        Log.d("swipe", String.format("onStartOpen %d - action %d", position, action));
-                    }
-
-                    @Override
-                    public void onStartClose(int position, boolean right) {
-                        Log.d("swipe", String.format("onStartClose %d", position));
-                    }
-
-                    @Override
-                    public void onClickFrontView(int position) {
-                        Log.d("swipe", String.format("onClickFrontView %d", position));
-
-
-                        swipelistview.openAnimate(position); //when you touch front view it will open
-
-
-                    }
-
-                    @Override
-                    public void onClickBackView(int position) {
-                        Log.d("swipe", String.format("onClickBackView %d", position));
-
-                        swipelistview.closeAnimate(position);//when you touch back view it will close
-                    }
-
-                    @Override
-                    public void onDismiss(int[] reverseSortedPositions) {
-
-                    }
-
-                });
-                swipelistview.setSwipeMode(SwipeListView.SWIPE_MODE_DEFAULT); // there are five swiping modes
-                swipelistview.setAnimationTime(300);
-                swipelistview.setAdapter(myArrayAdapter);
             }
 
 
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+
+                    try {
+                        final Read_contacts itemAtPosition = (Read_contacts) parent.getItemAtPosition(position);
+
+
+                        Contact contact = dataBaseHelper.getContact(itemAtPosition.getNumber());
+
+                        if (contact.get_phoneNumber() == null) {
+
+                            dataBaseHelper.addContact(new Contact(itemAtPosition.getNumber(), itemAtPosition.getName()));
+                        }
+
+
+                        final HashMap<String, Boolean> hashMap = new HashMap<String, Boolean>(); // Where we track the selected items
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+                        String[] toppings = {"Call", "Message", "Both"};
+                        builder.setTitle("Block")
+
+                                .setMultiChoiceItems(toppings, null,
+                                        new DialogInterface.OnMultiChoiceClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which,
+                                                                boolean isChecked) {
+
+
+                                                switch (which) {
+
+                                                    case 0:
+
+                                                        if (isChecked) {
+
+                                                            hashMap.put("Call", true);
+                                                        }
+
+                                                        break;
+                                                    case 1:
+                                                        if (isChecked) {
+                                                            hashMap.put("Msg", true);
+                                                        }
+                                                        break;
+                                                    case 2:
+
+                                                        if (isChecked) {
+                                                            hashMap.put("Both", true);
+                                                        }
+                                                        break;
+                                                }
+
+
+                                            }
+                                        })
+                                        // Set the action buttons
+                                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int id) {
+
+
+                                        Boolean both = hashMap.get("Both") != null ? hashMap.get("Both") : false;
+                                        Boolean call = hashMap.get("Call") != null ? hashMap.get("Call") : false;
+                                        Boolean msg = hashMap.get("Msg") != null ? hashMap.get("Msg") : false;
+
+                                        if (both) {
+
+                                            dataBaseHelper.updateContact(new Contact(itemAtPosition.getNumber(),
+                                                    itemAtPosition.getName(), true, true, itemAtPosition.getPhoto()));
+
+                                        } else {
+                                            dataBaseHelper.updateContact(new Contact(itemAtPosition.getNumber(),
+                                                    itemAtPosition.getName(), call, msg, itemAtPosition.getPhoto()));
+
+                                        }
+                                    }
+                                })
+                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int id) {
+
+
+                                    }
+                                });
+                        builder.show();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+
+//
+                }
+            });
+
+
+            listView.setAdapter(adapter);
+
+
             return rootView;
+
         }
 
         @Override
@@ -708,75 +638,6 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
             super.onPause();
         }
 
-
-        class Message_Frag_Adapter extends ArrayAdapter<Read_sms> {
-            private final Activity context;
-            private final List<Read_sms> names;
-
-            public Message_Frag_Adapter(Activity context, List<Read_sms> names) {
-
-                super(context, android.R.layout.simple_list_item_1, names);
-                this.context = context;
-                this.names = names;
-
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                LayoutInflater inflater;
-
-                View rowView = convertView;
-                if (rowView == null) {
-                    inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    rowView = inflater.inflate(R.layout.custom_row, null);
-                    ViewHolder viewHolder = new ViewHolder();
-                    viewHolder.name = (TextView) rowView.findViewById(R.id.name);
-                    viewHolder.letterImageView = (LetterImageView) rowView.findViewById(R.id.iv_avatar);
-
-                    viewHolder.button1 = (ImageView) rowView.findViewById(R.id.swipe_button1);
-                    viewHolder.button2 = (ImageView) rowView.findViewById(R.id.swipe_button2);
-
-                    rowView.setTag(viewHolder);
-                }
-
-                Read_sms s = names.get(position);
-                ViewHolder viewHolder = (ViewHolder) rowView.getTag();
-                viewHolder.name.setText(s.getName());
-                viewHolder.letterImageView.setLetter(s.getName().charAt(0));
-                viewHolder.button1.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        // TODO Auto-generated method stub
-                        Toast.makeText(context, "Button 1 Clicked", Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-                viewHolder.button2.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        // TODO Auto-generated method stub
-                        Toast.makeText(context, "Button 2 Clicked", Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-
-                return rowView;
-            }
-
-
-            class ViewHolder {
-                ImageView button1;
-                ImageView button2;
-                ImageView button3;
-                TextView name;
-                TextView number;
-                LetterImageView letterImageView;
-
-            }
-
-        }
 
     }
 
@@ -817,16 +678,10 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
             mGridView = (StaggeredGridView) inflate.findViewById(R.id.grid_view);
 
 
-            View header = inflater.inflate(R.layout.list_item_header_footer, null);
+            List<Contact> allContacts_true = dataBaseHelper.getAllContacts_true();
+            List<Contact> allContacts_true1 = dataBaseHelper.getAllContacts();
 
-//            txtHeaderTitle = (TextView) header.findViewById(R.id.txt_title);
-
-//            txtHeaderTitle.setText("BLOCK BY CALLS");
-//            mGridView.addHeaderView(header);
-
-            mAdapter = new SampleAdapter(getActivity(), dataBaseHelper.getAllContacts());
-//            txtHeaderTitle.setText("BLOCK BY MESSAGES");
-//            mGridView.addHeaderView(header);
+            mAdapter = new SampleAdapter(getActivity(), dataBaseHelper.getAllContacts_true());
 
 
             mGridView.setAdapter(mAdapter);
@@ -899,11 +754,82 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
     }
 
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+    static class Adapter extends ArrayAdapter<Read_contacts> {
+        private final Activity context;
+        private final List<Read_contacts> names;
+        DataBaseHelper dataBaseHelper;
+
+        //            HashMap< Integer,Read_contacts> mIdMap ;
+        public Adapter(Activity context, List<Read_contacts> names) {
+
+            super(context, android.R.layout.simple_list_item_1, names);
+//                mIdMap = new HashMap<Integer, Read_contacts>();
+            dataBaseHelper = new DataBaseHelper(getContext());
+            this.context = context;
+            this.names = names;
+
+
+        }
+
+        @Override
+        public long getItemId(int position) {
+
+            return position;
+        }
+
+        @Override
+        public boolean hasStableIds() {
+            return true;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            LayoutInflater inflater;
+            View rowView = convertView;
+            try {
+
+                if (rowView == null) {
+                    inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    rowView = inflater.inflate(R.layout.custom_row, null);
+                    ViewHolder viewHolder = new ViewHolder();
+                    viewHolder.name = (TextView) rowView.findViewById(R.id.name);
+                    viewHolder.letterImageView = (LetterImageView) rowView.findViewById(R.id.iv_avatar);
+                    rowView.setTag(viewHolder);
+
+                }
+                ViewHolder viewHolder = (ViewHolder) rowView.getTag();
+                final Read_contacts read_contacts = names.get(position);
+                if (read_contacts.getName() == null) {
+                    viewHolder.name.setText(read_contacts.getNumber());
+                    viewHolder.letterImageView.setLetter(read_contacts.getNumber().charAt(0));
+                } else {
+                    viewHolder.name.setText(read_contacts.getName());
+                    viewHolder.letterImageView.setLetter(read_contacts.getName().charAt(0));
+                }
+
+
+                return rowView;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return rowView;
+            }
+        }
+
+        class ViewHolder {
+
+            TextView name;
+
+            LetterImageView letterImageView;
+
+        }
+    }
+
+    public class SectionsPagerAdapter extends FragmentStatePagerAdapter {
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
+
 
         @Override
         public Fragment getItem(int position) {
@@ -911,9 +837,11 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                 case 0:
                     ;
                     return PlaceholderFragment.newInstance(position + 1);
+
                 case 1:
 
                     return StaggeredGridFragment.newInstance(position + 1);
+
 
 //                return PlaceholderFragment.newInstance(position + 1);
                 case 2:
@@ -943,17 +871,34 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
             super.restoreState(state, loader);
         }
 
-        @Override
-        public long getItemId(int position) {
-
-            int position1 = position;
-            return super.getItemId(position1);
-        }
 
         @Override
         public int getCount() {
             // Show 3 total pages.
             return 5;
+        }
+
+
+        @Override
+        public int getItemPosition(Object object) {
+
+
+            if (object.getClass().getName().equals(StaggeredGridFragment.class.getName())) {
+                return POSITION_NONE;
+
+            } else {
+                return POSITION_UNCHANGED;
+            }
+
+
+//           android.app.Fragment fragment = (android.app.Fragment) object;
+//
+//
+//
+//
+//
+
+
         }
 
         @Override
@@ -976,6 +921,5 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
             return null;
         }
     }
-
 
 }

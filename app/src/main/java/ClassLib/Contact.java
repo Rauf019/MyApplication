@@ -1,13 +1,12 @@
 package ClassLib;
 
 public class Contact {
+
     String _Name;
     String _phoneNumber;
-
     boolean _is_Call_block;
     boolean _is_Msg_block;
     private String photo;
-
 
     public Contact(String _phoneNumber, String _Name, boolean _is_Call_block,
                    boolean _is_Msg_block, String photo) {
