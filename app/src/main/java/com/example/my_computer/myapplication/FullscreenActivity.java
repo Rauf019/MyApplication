@@ -21,11 +21,20 @@ import java.util.List;
 public class FullscreenActivity extends Activity {
 
     public static Custum_Class custum_class;
-
+    AsyncTask<Void, Integer, Custum_Class> execute;
     @Override
     protected void onPause() {
         super.onPause();
+        execute.cancel(true);
         finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        execute.cancel(true);
+        finish();
+
     }
 
     @Override
@@ -34,7 +43,7 @@ public class FullscreenActivity extends Activity {
 
         setContentView(R.layout.activity_fullscreen);
 
-        new Task().execute();
+        execute = new Task().execute();
 
 
     }

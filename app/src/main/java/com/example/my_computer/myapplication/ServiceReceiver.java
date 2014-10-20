@@ -13,33 +13,34 @@ import android.telephony.PhoneStateListener;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.lang.reflect.Method;
-import java.util.List;
 
-import ClassLib.Contact;
-
-interface ITelephony {
-    boolean endCall();
-
-    void answerRingingCall();
-
-    void silenceRinger();
-}
 
 public class ServiceReceiver extends BroadcastReceiver {
 
-    List<Contact> contacts;
+
     Context context;
-    private TelephonyManager telephony;
-    private SmsMessage[] msgs;
+    TelephonyManager telephony;
+    DataBaseHelper dataBaseHelper;
+
 
     public void onReceive(Context context, Intent intent) {
 
         this.context = context;
+
+        dataBaseHelper = new DataBaseHelper(context);
+
+
         telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 
-        Sms(intent, contacts);
+
+        if (intent.getAction() != "android.intent.action.PHONE_STATE") {
+
+            Sms(intent);
+        }
+
 
         MyPhoneStateListener listener = new MyPhoneStateListener();
 
@@ -47,38 +48,32 @@ public class ServiceReceiver extends BroadcastReceiver {
 
     }
 
-    public void Sms(Intent intent, List<Contact> contacts) {
-        if (intent != null) {
-            String action = intent.getAction();
-            if (action.equals("android.provider.Telephony.SMS_RECEIVED")) {
-                Bundle extras = intent.getExtras();
-                if (extras != null) {
+    public void Sms(Intent intent) {
 
-                    try {
-                        Object[] pdus = (Object[]) extras.get("pdus");
-                        msgs = new SmsMessage[pdus.length];
-                        for (int i = 0; i < msgs.length; i++) {
-                            msgs[i] = SmsMessage
-                                    .createFromPdu((byte[]) pdus[i]);
-                            String msg_from = msgs[i].getOriginatingAddress();
+        // Retrieves a map of extended data from the intent.
+        final Bundle bundle = intent.getExtras();
 
-                            for (int j = 0; j < contacts.size(); j++)
+        try {
 
-                            {
-                                if (msg_from.contains(contacts.get(j)
-                                        .get_phoneNumber()))
+            if (bundle != null) {
 
-                                {
-                                    abortBroadcast();
-                                }
-                            }
+                final Object[] pdusObj = (Object[]) bundle.get("pdus");
 
-                        }
-                    } catch (Exception e) {
-                        Log.d("Exception caught", e.getMessage());
+                for (int i = 0; i < pdusObj.length; i++) {
+
+                    SmsMessage currentMessage = SmsMessage.createFromPdu((byte[]) pdusObj[i]);
+                    String phoneNumber = currentMessage.getDisplayOriginatingAddress();
+                    Contact contact = dataBaseHelper.getContact(phoneNumber);
+
+                    if (contact.get_is_Msg_block()) {
+                        notification("Call Blocker", "Message Block " + phoneNumber);
+                        abortBroadcast();
                     }
                 }
             }
+        } catch (Exception e) {
+            Toast.makeText(context, "Unable to Delete Sms ", Toast.LENGTH_SHORT).show();
+
         }
     }
 
@@ -88,7 +83,7 @@ public class ServiceReceiver extends BroadcastReceiver {
 
     public void notification(String Not_Title, String text) {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
-                context).setSmallIcon(R.drawable.ic_launcher)
+                context).setSmallIcon(R.drawable.call)
                 .setContentTitle(Not_Title).setContentText(text)
                 .setAutoCancel(true);
         Intent intent = new Intent(context, MyActivity.class);
@@ -100,40 +95,49 @@ public class ServiceReceiver extends BroadcastReceiver {
         mNotificationManager.notify(0, mBuilder.build());
     }
 
-    public void Call_Filter() {
+    public void Call_Filter(String incomingNumber) {
+
+
         try {
+            Contact contact = dataBaseHelper.getContact(incomingNumber);
 
-            String serviceManagerName = "android.os.ServiceManager";
-            String serviceManagerNativeName = "android.os.ServiceManagerNative";
-            String telephonyName = "com.android.internal.telephony.ITelephony";
-            Class<?> telephonyClass;
-            Class<?> telephonyStubClass;
-            Class<?> serviceManagerClass;
-            Class<?> serviceManagerNativeClass;
-            Method telephonyEndCall;
-            Object telephonyObject;
-            Object serviceManagerObject;
-            telephonyClass = Class.forName(telephonyName);
-            telephonyStubClass = telephonyClass.getClasses()[0];
-            serviceManagerClass = Class.forName(serviceManagerName);
-            serviceManagerNativeClass = Class.forName(serviceManagerNativeName);
-            Method getService = // getDefaults[29];
-                    serviceManagerClass.getMethod("getService", String.class);
-            Method tempInterfaceMethod = serviceManagerNativeClass.getMethod(
-                    "asInterface", IBinder.class);
-            Binder tmpBinder = new Binder();
-            tmpBinder.attachInterface(null, "fake");
-            serviceManagerObject = tempInterfaceMethod.invoke(null, tmpBinder);
-            IBinder retbinder = (IBinder) getService.invoke(
-                    serviceManagerObject, "phone");
-            Method serviceMethod = telephonyStubClass.getMethod("asInterface",
-                    IBinder.class);
-            telephonyObject = serviceMethod.invoke(null, retbinder);
-            telephonyEndCall = telephonyClass.getMethod("endCall");
-            telephonyEndCall.invoke(telephonyObject);
+            if (contact.get_is_Call_block()) {
 
+                notification("Call Blocker", "Call Block from" + incomingNumber);
+                String serviceManagerName = "android.os.ServiceManager";
+                String serviceManagerNativeName = "android.os.ServiceManagerNative";
+                String telephonyName = "com.android.internal.telephony.ITelephony";
+                Class<?> telephonyClass;
+                Class<?> telephonyStubClass;
+                Class<?> serviceManagerClass;
+                Class<?> serviceManagerNativeClass;
+                Method telephonyEndCall;
+                Object telephonyObject;
+                Object serviceManagerObject;
+                telephonyClass = Class.forName(telephonyName);
+                telephonyStubClass = telephonyClass.getClasses()[0];
+                serviceManagerClass = Class.forName(serviceManagerName);
+                serviceManagerNativeClass = Class.forName(serviceManagerNativeName);
+                Method getService =
+                        serviceManagerClass.getMethod("getService", String.class);
+                Method tempInterfaceMethod = serviceManagerNativeClass.getMethod(
+                        "asInterface", IBinder.class);
+                Binder tmpBinder = new Binder();
+                tmpBinder.attachInterface(null, "fake");
+                serviceManagerObject = tempInterfaceMethod.invoke(null, tmpBinder);
+                IBinder retbinder = (IBinder) getService.invoke(
+                        serviceManagerObject, "phone");
+                Method serviceMethod = telephonyStubClass.getMethod("asInterface",
+                        IBinder.class);
+                telephonyObject = serviceMethod.invoke(null, retbinder);
+                telephonyEndCall = telephonyClass.getMethod("endCall");
+                telephonyEndCall.invoke(telephonyObject);
+
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            Toast.makeText(context, "Unable to Block Call", Toast.LENGTH_SHORT).show();
+
 
         }
     }
@@ -147,67 +151,21 @@ public class ServiceReceiver extends BroadcastReceiver {
                     Log.d("DEBUG", "CALL_STATE_IDLE");
 
                     break;
+
                 case TelephonyManager.CALL_STATE_OFFHOOK:
                     Log.d("DEBUG", "CALL_STATE_OFFHOOK");
 
                     break;
+
                 case TelephonyManager.CALL_STATE_RINGING:
                     Log.d("DEBUG", "CALL_STATE_RINGING");
-                    notification("Call Blocker", "Call Block from ");
-                    Call_Filter();
+                    Call_Filter(incomingNumber);
+
                     break;
 
             }
         }
 
     }
-
-
 }
 
-class messageData {
-
-    long _id, _thread_id;
-    String _Add, _Body;
-
-    public messageData(long _id, long _thread_id, String _Add, String _Body) {
-        super();
-        this._id = _id;
-        this._Add = _Add;
-        this._Body = _Body;
-        this._thread_id = _thread_id;
-    }
-
-    public long get_id() {
-        return _id;
-    }
-
-    public void set_id(long _id) {
-        this._id = _id;
-    }
-
-    public String get_Add() {
-        return _Add;
-    }
-
-    public void set_Add(String _Add) {
-        this._Add = _Add;
-    }
-
-    public String get_Body() {
-        return _Body;
-    }
-
-    public void set_Body(String _Body) {
-        this._Body = _Body;
-    }
-
-    public long get_thread_id() {
-        return _thread_id;
-    }
-
-    public void set_thread_id(long _thread_id) {
-        this._thread_id = _thread_id;
-    }
-
-}

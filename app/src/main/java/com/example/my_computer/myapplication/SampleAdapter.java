@@ -1,4 +1,4 @@
-package ClassLib;
+package com.example.my_computer.myapplication;
 
 
 import android.content.Context;
@@ -12,7 +12,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.etsy.android.grid.util.DynamicHeightTextView;
-import com.example.my_computer.myapplication.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -105,7 +104,6 @@ public class SampleAdapter extends ArrayAdapter<Contact> {
 
                 Picasso.with(getContext())
                         .load(R.drawable.contact)
-
                         .into(vh.contact_img);
 
             }
@@ -147,7 +145,6 @@ public class SampleAdapter extends ArrayAdapter<Contact> {
 
         return convertView;
     }
-
 
     static class ViewHolder {
         DynamicHeightTextView txtLineOne;

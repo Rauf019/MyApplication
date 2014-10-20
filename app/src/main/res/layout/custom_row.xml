@@ -3,41 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!--<LinearLayout-->
-    <!--android:id="@+id/back"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="70dp"-->
-    <!--android:tag="back"-->
-    <!-->-->
-
-    <!--<ImageView-->
-    <!--android:id="@+id/swipe_button1"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:layout_gravity="center"-->
-    <!--android:layout_marginLeft="25dp"-->
-    <!--android:background="@drawable/call" />-->
-
-    <!--<ImageView-->
-    <!--android:id="@+id/swipe_button2"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:layout_gravity="center"-->
-    <!--android:layout_marginLeft="25dp"-->
-    <!--android:background="@drawable/msg" />-->
-
-
-    <!--<ImageView-->
-    <!--android:id="@+id/swipe_button3"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:layout_gravity="center"-->
-    <!--android:layout_marginLeft="25dp"-->
-    <!--android:background="@drawable/call" />-->
-
-
-    <!--</LinearLayout>-->
-
     <RelativeLayout
         android:id="@+id/front"
         android:layout_width="match_parent"
@@ -46,7 +11,7 @@
         android:background="#fff"
         android:tag="front">
 
-        <ClassLib.LetterImageView
+        <com.example.my_computer.myapplication.LetterImageView
             android:id="@+id/iv_avatar"
             android:layout_width="67dp"
             android:layout_height="67dp"
@@ -61,10 +26,11 @@
             android:layout_marginLeft="7dp"
             android:layout_toEndOf="@+id/iv_avatar"
             android:layout_toRightOf="@+id/iv_avatar"
-            android:maxLines="10"
+            android:maxLines="3"
             android:singleLine="false"
             android:text="Name"
-            android:textSize="17sp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+
             android:textStyle="normal" />
 
 

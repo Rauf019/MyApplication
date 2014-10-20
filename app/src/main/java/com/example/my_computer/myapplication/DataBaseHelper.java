@@ -1,4 +1,4 @@
-package ClassLib;
+package com.example.my_computer.myapplication;
 
 import android.content.ContentValues;
 import android.content.Context;

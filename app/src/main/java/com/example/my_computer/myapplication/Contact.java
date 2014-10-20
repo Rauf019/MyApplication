@@ -1,4 +1,4 @@
-package ClassLib;
+package com.example.my_computer.myapplication;
 
 public class Contact {
 
