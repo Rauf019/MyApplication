@@ -56,8 +56,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     public void addContact(Contact contact) {
 
         try {
-
-
             SQLiteDatabase db = this.getWritableDatabase();
             ContentValues values = new ContentValues();
             values.put(PHONE_NUMBER, contact.get_phoneNumber());
@@ -65,14 +63,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
             values.put(IS_CALL_BLOCK, contact.get_is_Call_block());
             values.put(IS_MSG_BLOCK, contact.get_is_Msg_block());
             values.put(PHOTO, contact.getPhoto());
-
-
             db.insert(TABLE_CONTACTS, null, values);
-//            if (insert != -1) {
-//                Toast.makeText(context, "Successfully Added", Toast.LENGTH_LONG).show();
-//            } else {
-//                Toast.makeText(context, "Unable to Added", Toast.LENGTH_LONG).show();
-//            }
             db.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -90,9 +81,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                             PHONE_NUMBER, NAME, IS_CALL_BLOCK, IS_MSG_BLOCK, PHOTO},
                     PHONE_NUMBER + "= ?", new String[]{String.valueOf(a)},
                     null, null, null, null);
-
             cursor.moveToFirst();
-
 
             do {
 
@@ -115,6 +104,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
 
     }
+
 
     public List<Contact> Sort_By(String val) {
 
@@ -183,7 +173,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         }
     }
 
-
     public List<Contact> getAllContacts_true() {
 
         List<Contact> contactList = null;
@@ -226,11 +215,12 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
     public boolean updateContact(Contact contact) {
         try {
+
+
             SQLiteDatabase db = this.getWritableDatabase();
 
             ContentValues values = new ContentValues();
-            values.put(PHONE_NUMBER, contact.get_phoneNumber()); // Contact Name
-
+            values.put(PHONE_NUMBER, contact.get_phoneNumber());
             values.put(NAME, contact.get_Name());
             values.put(IS_CALL_BLOCK, contact.get_is_Call_block());
             values.put(IS_MSG_BLOCK, contact.get_is_Msg_block());
@@ -252,8 +242,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         int delete = db.delete(TABLE_CONTACTS, PHONE_NUMBER + " = ?",
                 new String[]{String.valueOf(val)});
-
-
         db.close();
         return delete;
     }

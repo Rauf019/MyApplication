@@ -13,6 +13,9 @@ import android.provider.ContactsContract;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +25,7 @@ public class FullscreenActivity extends Activity {
 
     public static Custum_Class custum_class;
     AsyncTask<Void, Integer, Custum_Class> execute;
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -49,12 +53,12 @@ public class FullscreenActivity extends Activity {
     }
 
     private HashMap<String, String> get_lookup(Context context, String Number) {
+
         HashMap<String, String> Lookup_list = new HashMap<String, String>();
         Uri lookupUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(Number));
         Cursor c = context.getContentResolver().query(lookupUri, new String[]{ContactsContract.Data.DISPLAY_NAME, ContactsContract.Data.PHOTO_URI}, null, null, null);
         try {
             if (c.moveToFirst()) {
-
 
                 if (c.getString(0) != null && !(c.getString(0).isEmpty())) {
 
@@ -72,6 +76,30 @@ public class FullscreenActivity extends Activity {
 
         }
         return Lookup_list;
+    }
+
+    public String remove_plus(String phoneNumber) {
+
+        try {
+            if (phoneNumber.charAt(0) == '+') {
+
+                PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+
+                Phonenumber.PhoneNumber numberProto = phoneUtil.parse(phoneNumber, "");
+
+                return "0" + String.valueOf(numberProto.getNationalNumber());
+
+            } else {
+
+                return phoneNumber;
+            }
+
+        } catch (Exception e) {
+
+
+            return null;
+        }
+
     }
 
     class Task extends AsyncTask<Void, Integer, Custum_Class> {
@@ -96,14 +124,19 @@ public class FullscreenActivity extends Activity {
                 ArrayList<Read_contacts> List_Read_contacts = null;
                 ArrayList<Read_contacts> List_Read_call_logs = null;
 
-
                 ContentResolver cr = getApplicationContext().getContentResolver();
+
                 Cursor cursor = cr.query(Uri.parse("content://sms/"), null, null, null, null);
+
                 Cursor cursor1 = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null,
                         ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
+
                 Cursor cursor2 = cr.query(Uri.parse("content://call_log/calls"),
                         null, null, null, null);
+
+
                 Total_count = cursor.getCount() + cursor1.getCount() + cursor2.getCount();
+
                 progressBar.setMax(Total_count);
 
                 cursor.moveToFirst();
@@ -116,8 +149,8 @@ public class FullscreenActivity extends Activity {
 
                 do {
 
-                    String Number = cursor.getString(cursor
-                            .getColumnIndex("address"));
+                    String Number = remove_plus(cursor.getString(cursor
+                            .getColumnIndex("address")));
 
                     HashMap<String, String> lookup = get_lookup(getApplicationContext(), Number);
 
@@ -183,7 +216,6 @@ public class FullscreenActivity extends Activity {
 
         @Override
         protected void onPostExecute(Custum_Class aClass) {
-
 
             super.onPostExecute(aClass);
 

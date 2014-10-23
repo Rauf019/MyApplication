@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
@@ -18,19 +19,16 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.etsy.android.grid.StaggeredGridView;
-import com.touchmenotapps.widget.radialmenu.menu.v1.RadialMenuItem;
-import com.touchmenotapps.widget.radialmenu.menu.v1.RadialMenuWidget;
 
-import java.util.ArrayList;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -40,30 +38,51 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
 
     public static FullscreenActivity.Custum_Class Loc_custum_class;
-    static FragmentManager supportFragmentManager;
     SectionsPagerAdapter mSectionsPagerAdapter;
     ViewPager mViewPager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Loc_custum_class = FullscreenActivity.custum_class;
-        supportFragmentManager = getSupportFragmentManager();
+
         if (Loc_custum_class == null) {
 
-            startActivity(new Intent(this, FullscreenActivity.class));
+            Intent intent = new Intent(this, FullscreenActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+            startActivity(intent);
+
 
         } else if (Loc_custum_class.is_intialize) {
-            setContentView(R.layout.activity_my);
 
+            setContentView(R.layout.activity_my);
 
             final ActionBar actionBar = getSupportActionBar();
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
             mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
+            try {
+                ViewConfiguration config = ViewConfiguration.get(this);
+                Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
+                if (menuKeyField != null) {
+                    menuKeyField.setAccessible(true);
+                    menuKeyField.setBoolean(config, false);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             mViewPager = (ViewPager) findViewById(R.id.pager);
             mViewPager.setAdapter(mSectionsPagerAdapter);
+
+
+//        SharedPreferences spref = PreferenceManager.getDefaultSharedPreferences(this);
+//        if (spref.contains("temple")) {
+//            String sEmailAddr = spref.getString("temple", "");
+//            String sEmailAddr1 = spref.getString("temple", "");
+//        }
+
+
             mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
                 @Override
                 public void onPageSelected(int position) {
@@ -91,13 +110,13 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
     @Override
     protected void onPause() {
         super.onPause();
-        finish();
+//        finish();
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        finish();
+        //    finish();
 
     }
 
@@ -111,10 +130,72 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0);
+        final SharedPreferences.Editor editor = pref.edit();
 
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+
+
+            int key_name = pref.getInt("key_name", 3);
+
+            builder.setTitle("Block Mode").setSingleChoiceItems(getResources().getStringArray(R.array.blockmode),
+                    key_name, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            switch (which) {
+
+                                case 0:
+
+//                getApplicationContext().getPackageManager().setComponentEnabledSetting(new ComponentName(getApplicationContext(), ServiceReceiver.class),
+//                        PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+                                    dialog.dismiss();
+                                    break;
+                                case 1:
+
+
+                                    dialog.dismiss();
+                                    break;
+                                case 2:
+
+                                    dialog.dismiss();
+                                    break;
+                                case 3:
+//
+//                getApplicationContext().getPackageManager().setComponentEnabledSetting(new ComponentName(getApplicationContext(), ServiceReceiver.class),
+//                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+
+                                    dialog.dismiss();
+                                    break;
+                                case 4:
+
+                                    dialog.dismiss();
+                                    break;
+                                case 5:
+
+                                    dialog.dismiss();
+                                    break;
+                            }
+                            editor.putInt("key_name", which);
+                            editor.commit();
+                        }
+                    }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+
+            builder.show();
+
+
+            return true;
+        } else if (id == R.id.action_settings1) {
+
+            startActivity(new Intent(this, SettingsActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -168,6 +249,8 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                     Adapter adapter = new Adapter(getActivity(), Loc_custum_class.getRead_contactses());
 
                     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+
                         @Override
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
@@ -181,15 +264,12 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                                 dataBaseHelper.addContact(new Contact(itemAtPosition.getNumber(), itemAtPosition.getName()));
                             }
 
-                            final Contact contact1 = dataBaseHelper.getContact(itemAtPosition.getNumber());
 
                             final HashMap<String, Boolean> hashMap = new HashMap<String, Boolean>(); // Where we track the selected items
                             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                            final boolean is_call = false,
-                                    is_msg = false,
-                                    is_both = false;
+
                             String[] toppings = {"Call", "Message", "Both"};
-                            builder.setTitle("Block")
+                            builder.setTitle(String.format("%s \n %s ( %s ) ", "Block ", itemAtPosition.getName(), itemAtPosition.getNumber()))
 
                                     .setMultiChoiceItems(toppings, null,
                                             new DialogInterface.OnMultiChoiceClickListener() {
@@ -325,8 +405,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
                             String[] toppings = {"Call", "Message", "Both"};
-                            builder.setTitle("Block")
-
+                            builder.setTitle(String.format("%s \n %s ( %s ) ", "Block ", itemAtPosition.getName(), itemAtPosition.getNumber()))
                                     .setMultiChoiceItems(toppings, null,
                                             new DialogInterface.OnMultiChoiceClickListener() {
                                                 @Override
@@ -413,240 +492,6 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
     }
 
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-        public RadialMenuItem menuItem, menuCloseItem, menuExpandItem;
-        public RadialMenuItem firstChildItem, secondChildItem, thirdChildItem;
-        private RadialMenuWidget pieMenu;
-        private FrameLayout mFragmentContainer;
-        private List<RadialMenuItem> children = new ArrayList<RadialMenuItem>();
-
-        public PlaceholderFragment() {
-        }
-
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.list, container, false);
-
-
-//            mFragmentContainer = (FrameLayout) rootView.findViewById(R.id.alt_fragment_container);
-//
-//            pieMenu = new RadialMenuWidget(getActivity());
-//            menuCloseItem = new RadialMenuItem("close", null);
-//            menuCloseItem
-//                    .setDisplayIcon(android.R.drawable.ic_menu_close_clear_cancel);
-//            menuItem = new RadialMenuItem(getString(R.string.normal),
-//                    getString(R.string.normal));
-//            menuItem.setOnMenuItemPressed(new RadialMenuItem.RadialMenuItemClickListener() {
-//                @Override
-//                public void execute() {
-//                 //   pieMenu.dismiss();
-//                }
-//            });
-//
-//            firstChildItem = new RadialMenuItem(getString(R.string.main_menu),
-//                    getString(R.string.main_menu));
-//            firstChildItem
-//                    .setOnMenuItemPressed(new RadialMenuItem.RadialMenuItemClickListener() {
-//                        @Override
-//                        public void execute() {
-//                            // Can edit based on preference. Also can add animations
-//                            // here.
-////						getSupportFragmentManager().popBackStack(null,
-////								FragmentManager.POP_BACK_STACK_INCLUSIVE);
-////						getSupportFragmentManager()
-////								.beginTransaction()
-////								.replace(mFragmentContainer.getId(),
-////										new RadialMenuMainFragment()).commit();
-//                            //	pieMenu.dismiss();
-//                        }
-//                    });
-//
-//            secondChildItem = new RadialMenuItem(getString(R.string.contact),
-//                    getString(R.string.contact));
-//            secondChildItem.setDisplayIcon(R.drawable.ic_launcher);
-//            secondChildItem
-//                    .setOnMenuItemPressed(new RadialMenuItem.RadialMenuItemClickListener() {
-//                        @Override
-//                        public void execute() {
-//                            // Can edit based on preference. Also can add animations
-//                            // here.
-////						getSupportFragmentManager().popBackStack(null,
-////								FragmentManager.POP_BACK_STACK_INCLUSIVE);
-////						getSupportFragmentManager()
-////								.beginTransaction()
-////								.replace(mFragmentContainer.getId(),
-////										new RadialMenuContactFragment())
-////								.commit();
-////						pieMenu.dismiss();
-//                        }
-//                    });
-//
-//            thirdChildItem = new RadialMenuItem(getString(R.string.about),
-//                    getString(R.string.about));
-//            thirdChildItem.setDisplayIcon(R.drawable.ic_launcher);
-//            thirdChildItem
-//                    .setOnMenuItemPressed(new RadialMenuItem.RadialMenuItemClickListener() {
-//                        @Override
-//                        public void execute() {
-//                            // Can edit based on preference. Also can add animations
-//                            // here.
-//					getFragmentManager().popBackStack(null,
-//								FragmentManager.POP_BACK_STACK_INCLUSIVE);
-//                            getFragmentManager()
-//								.beginTransaction()
-//								.replace(mFragmentContainer.getId(),
-//										new RadialMenuAboutFragment()).commit();
-//						pieMenu.dismiss();
-//                        }
-//                    });
-//
-//            menuExpandItem = new RadialMenuItem(getString(R.string.expandable),
-//                    getString(R.string.expandable));
-//
-//            children.add(firstChildItem);
-//            children.add(secondChildItem);
-//            children.add(thirdChildItem);
-//            menuExpandItem.setMenuChildren(children);
-//
-//            menuCloseItem
-//                    .setOnMenuItemPressed(new RadialMenuItem.RadialMenuItemClickListener() {
-//                        @Override
-//                        public void execute() {
-//                            // menuLayout.removeAllViews();
-////						pieMenu.dismiss();
-//                        }
-//                    });
-//
-//            // pieMenu.setDismissOnOutsideClick(true, menuLayout);
-//            pieMenu.setAnimationSpeed(0L);
-//            pieMenu.setSourceLocation(200, 200);
-//            pieMenu.setIconSize(15, 30);
-//            pieMenu.setTextSize(13);
-//            pieMenu.setOutlineColor(Color.BLACK, 225);
-//            pieMenu.setInnerRingColor(0xAA66CC, 180);
-//            pieMenu.setOuterRingColor(0x0099CC, 180);
-//            //pieMenu.setHeader("Test Menu", 20);
-//            pieMenu.setCenterCircle(menuCloseItem);
-//
-//            pieMenu.addMenuEntry(new ArrayList<RadialMenuItem>() {
-//                {
-//                    add(menuItem);
-//                    add(menuExpandItem);
-//                }
-//            });
-//
-//            // pieMenu.addMenuEntry(menuItem);
-//            // pieMenu.addMenuEntry(menuExpandItem);
-//            pieMenu.show(mFragmentContainer);
-
-
-            ListView listView = (ListView) rootView.findViewById(R.id.listView);
-            List<String> list = new ArrayList<String>();
-
-            list.add("Allow Only Contacts");
-            list.add("Accepts All");
-            list.add("Black List Mode");
-            list.add("Block All");
-            list.add("Do Not Disturb");
-            Start_Adapter start_adapter = new Start_Adapter(getActivity(), list);
-            listView.setAdapter(start_adapter);
-
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                }
-            });
-
-
-            return rootView;
-        }
-
-        static class Start_Adapter extends ArrayAdapter<String> {
-            private final Activity context;
-            private final List<String> names;
-            DataBaseHelper dataBaseHelper;
-
-            //            HashMap< Integer,Read_contacts> mIdMap ;
-            public Start_Adapter(Activity context, List<String> names) {
-
-                super(context, android.R.layout.simple_list_item_1, names);
-
-                dataBaseHelper = new DataBaseHelper(getContext());
-                this.context = context;
-                this.names = names;
-
-
-            }
-
-            @Override
-            public long getItemId(int position) {
-
-                return position;
-            }
-
-            @Override
-            public boolean hasStableIds() {
-                return true;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                LayoutInflater inflater;
-                View rowView = convertView;
-                try {
-
-                    if (rowView == null) {
-                        inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                        rowView = inflater.inflate(R.layout.custum_start_row, null);
-                        ViewHolder viewHolder = new ViewHolder();
-                        viewHolder.name = (TextView) rowView.findViewById(R.id.textView12);
-                        viewHolder.imageView = (ImageView) rowView.findViewById(R.id.imageView12);
-                        rowView.setTag(viewHolder);
-
-                    }
-
-                    ViewHolder viewHolder = (ViewHolder) rowView.getTag();
-
-                    viewHolder.name.setText(names.get(position));
-
-                    return rowView;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return rowView;
-                }
-            }
-
-            class ViewHolder {
-
-                TextView name;
-
-                ImageView imageView;
-
-            }
-        }
-
-    }
 
     public static class Message_Frag extends Fragment {
         /**
@@ -706,7 +551,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
                         String[] toppings = {"Call", "Message", "Both"};
-                        builder.setTitle("Block")
+                        builder.setTitle(String.format("%s\n %s ( %s ) ", "Block ", itemAtPosition.getName(), itemAtPosition.getNumber()))
 
                                 .setMultiChoiceItems(toppings, null,
                                         new DialogInterface.OnMultiChoiceClickListener() {
@@ -794,12 +639,10 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
     public static class StaggeredGridFragment extends Fragment {
 
         private static final String ARG_SECTION_NUMBER = "section_number";
-        List<Contact> contact1;
-        TextView txtHeaderTitle;
         DataBaseHelper dataBaseHelper;
         private StaggeredGridView mGridView;
-        private boolean mHasRequestedMore;
         private SampleAdapter mAdapter;
+
 
         public static StaggeredGridFragment newInstance(int sectionNumber) {
             StaggeredGridFragment fragment = new StaggeredGridFragment();
@@ -826,12 +669,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
             mGridView = (StaggeredGridView) inflate.findViewById(R.id.grid_view);
 
-//
-//            List<Contact> allContacts_true = dataBaseHelper.getAllContacts_true();
-//            List<Contact> allContacts_true1 = dataBaseHelper.getAllContacts();
-
             mAdapter = new SampleAdapter(getActivity(), dataBaseHelper.getAllContacts_true());
-
 
             mGridView.setAdapter(mAdapter);
 
@@ -847,11 +685,11 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
         private final List<Read_contacts> names;
         DataBaseHelper dataBaseHelper;
 
-        //            HashMap< Integer,Read_contacts> mIdMap ;
+
         public Adapter(Activity context, List<Read_contacts> names) {
 
             super(context, android.R.layout.simple_list_item_1, names);
-//                mIdMap = new HashMap<Integer, Read_contacts>();
+
             dataBaseHelper = new DataBaseHelper(getContext());
             this.context = context;
             this.names = names;
@@ -887,6 +725,8 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                 }
                 ViewHolder viewHolder = (ViewHolder) rowView.getTag();
                 final Read_contacts read_contacts = names.get(position);
+
+
                 if (read_contacts.getName() == null) {
                     viewHolder.name.setText(read_contacts.getNumber());
                     viewHolder.letterImageView.setLetter(read_contacts.getNumber().charAt(0));
@@ -923,25 +763,23 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    ;
-                    return PlaceholderFragment.newInstance(position + 1);
-
-                case 1:
 
                     return StaggeredGridFragment.newInstance(position + 1);
 
+                case 1:
+
+
+                    return Contact_Frag.newInstance(position + 1);
 
 //                return PlaceholderFragment.newInstance(position + 1);
                 case 2:
                     //   return PlaceholderFragment.newInstance(position + 1);
-                    return Contact_Frag.newInstance(position + 1);
 
-
-                case 3:
                     return Message_Frag.newInstance(position + 1);
 
-                case 4:
+                case 3:
                     return Call_log_Frag.newInstance(position + 1);
+
 
             }
             return null;
@@ -963,7 +801,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 5;
+            return 4;
         }
 
 
@@ -996,15 +834,15 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
 
                 case 0:
-                    return getString(R.string.title_section0).toUpperCase(l);
-                case 1:
+
                     return getString(R.string.title_section1).toUpperCase(l);
-                case 2:
+                case 1:
                     return getString(R.string.title_section2).toUpperCase(l);
-                case 3:
+                case 2:
                     return getString(R.string.title_section3).toUpperCase(l);
-                case 4:
+                case 3:
                     return getString(R.string.title_section4).toUpperCase(l);
+
             }
             return null;
         }
