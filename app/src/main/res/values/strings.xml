@@ -40,13 +40,23 @@
         <item>#cccccc</item>
         <item>#888888</item>
     </string-array>
+
+
     <string-array name="blockmode">
         <item>Accepts All calls</item>
         <item>Block All calls </item>
         <item>Allow Only Contacts</item>
-        <item>Block calls from black List </item>
-        <item>Accepts  calls from white List </item>
+        <item>Block Calls From Black List </item>
         <item>Do not Disturb</item>
+    </string-array>
+
+
+    <string-array name="duration">
+        <item>15 minutes</item>
+        <item>Half an Hour </item>
+        <item>One Hour </item>
+        <item>Two Hours</item>
+        <item>Three Hours</item>
     </string-array>
 
     <string name="action_contact">Contact</string>
@@ -62,5 +72,45 @@
     <string name="add_widget">Add widget</string>
     <string name="title_activity_share">Share</string>
     <string name="title_activity_review">Review</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <string name="pref_header_general">General</string>
+
+
+    <string name="pref_title_display_name">Display name</string>
+    <string name="pref_default_display_name">John Smith</string>
+
+    <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
+
+
+    <string name="pref_title_sync_frequency">Sync frequency</string>
+    <string-array name="pref_sync_frequency_titles">
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>3 hours</item>
+        <item>6 hours</item>
+        <item>Never</item>
+    </string-array>
+
+    <string-array name="pref_sync_frequency_values">
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>180</item>
+        <item>360</item>
+        <item>-1</item>
+    </string-array>
+
+    <string name="pref_title_system_sync_settings">System sync settings</string>
+
+    <!-- Example settings for Notifications -->
+    <string name="pref_header_notifications">Notifications</string>
+
+    <string name="pref_title_new_message_notifications">New message notifications</string>
+
+    <string name="pref_title_ringtone">Ringtone</string>
+    <string name="pref_ringtone_silent">Silent</string>
+
 
 </resources>

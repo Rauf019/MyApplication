@@ -12,6 +12,6 @@
 
     <header
         android:fragment="com.example.my_computer.myapplication.SettingsActivity$DataSyncPreferenceFragment"
-        android:title="@string/pref_header_data_sync" />
+        android:title="212" />
 
 </preference-headers>

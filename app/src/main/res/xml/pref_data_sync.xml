@@ -1,18 +1,19 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
 
+    <!--<Preference-->
+    <!--android:summary="Do you want to share this app with your friends"-->
+    <!--android:title="Share">-->
+    <!--<intent android:action="com.example.my_computer.myapplication.Share" />-->
+    <!--</Preference>-->
+    <!--<Preference-->
+    <!--android:summary="Do you like our app?"-->
+    <!--android:title="Submit review">-->
+    <!--<intent android:action="com.example.my_computer.myapplication.Review" />-->
+    <!--</Preference>-->
+
+
     <Preference
-
-        android:summary="Do you want to share this app with your friends"
-        android:title="Share">
-
-        <intent android:action="com.example.my_computer.myapplication.Share" />
-    </Preference>
-
-    <Preference
-        android:summary="Do you like our app?"
-        android:title="Submit review">
-
-        <intent android:action="com.example.my_computer.myapplication.Review" />
-    </Preference>
+        android:key="key"
+        android:title="See Android Market"></Preference>
 </PreferenceScreen>

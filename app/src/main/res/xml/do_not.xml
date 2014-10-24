@@ -6,16 +6,23 @@
         android:defaultValue="i am busy right now , i will call you later"
         android:inputType="text"
         android:key="temple"
-        android:selectAllOnFocus="true"
-        android:title="Template"
+        android:lines="5"
+        android:singleLine="false"
+        android:summary="Enter text template"
+
+        android:title="Text template"
 
         />
-    <EditTextPreference
-        android:inputType="datetime"
-        android:maxLines="10"
-        android:selectAllOnFocus="true"
-        android:singleLine="false"
-        android:title="Duration" />
+    <ListPreference
+        android:defaultValue="-1"
+        android:entries="@array/duration"
+        android:entryValues="@array/duration"
+        android:key="duration"
+        android:summary="Enter time duration "
+        android:title="Duration"
+
+
+        />
 
 
 </PreferenceScreen>

@@ -100,11 +100,7 @@ public class ServiceReceiver extends BroadcastReceiver {
 
                 break;
 
-            case 4:   // allow white list
-
-
-                break;
-            case 5:   // do not disturb
+            case 4:   // do not disturb
 
                 try {
 
@@ -118,11 +114,14 @@ public class ServiceReceiver extends BroadcastReceiver {
                     e.printStackTrace();
                 }
                 break;
+
+            case 5:  // allow white list
+                break;
+
         }
 
 
     }
-
 
     private boolean get_lookup(Context context, String Number) {
 

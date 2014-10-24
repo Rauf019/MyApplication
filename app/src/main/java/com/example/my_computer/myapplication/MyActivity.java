@@ -62,6 +62,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
             final ActionBar actionBar = getSupportActionBar();
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
             mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
             try {
                 ViewConfiguration config = ViewConfiguration.get(this);
                 Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
@@ -72,15 +73,11 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
             mViewPager = (ViewPager) findViewById(R.id.pager);
             mViewPager.setAdapter(mSectionsPagerAdapter);
 
 
-//        SharedPreferences spref = PreferenceManager.getDefaultSharedPreferences(this);
-//        if (spref.contains("temple")) {
-//            String sEmailAddr = spref.getString("temple", "");
-//            String sEmailAddr1 = spref.getString("temple", "");
-//        }
 
 
             mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
@@ -491,7 +488,6 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
         }
 
     }
-
 
     public static class Message_Frag extends Fragment {
         /**
