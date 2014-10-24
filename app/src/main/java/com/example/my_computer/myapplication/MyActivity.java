@@ -36,7 +36,7 @@ import java.util.Locale;
 
 public class MyActivity extends ActionBarActivity implements ActionBar.TabListener {
 
-
+    //rauf
     public static FullscreenActivity.Custum_Class Loc_custum_class;
     SectionsPagerAdapter mSectionsPagerAdapter;
     ViewPager mViewPager;
