@@ -5,9 +5,10 @@
         android:summary="Enable or Disable Password Protection"
         android:title="Password Protection" />
 
+
     <CheckBoxPreference
         android:defaultValue="false"
-        android:key="_password_on_app_start"
+        android:key="password_on_app_start"
         android:summary="Password on app start"
         android:title="App start" />
 

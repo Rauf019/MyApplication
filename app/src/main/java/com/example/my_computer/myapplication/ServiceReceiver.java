@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.PhoneStateListener;
@@ -34,7 +35,12 @@ public class ServiceReceiver extends BroadcastReceiver {
     TelephonyManager telephony;
     DataBaseHelper dataBaseHelper;
     SharedPreferences pref;
-    private Intent intent;
+    Intent intent;
+    boolean p_calls;
+    boolean notification;
+    String temple;
+    String duration;
+
 
     public void onReceive(Context context, Intent intent) {
 
@@ -42,11 +48,9 @@ public class ServiceReceiver extends BroadcastReceiver {
         this.context = context;
         dataBaseHelper = new DataBaseHelper(context);
         telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-
+        shared(context);
         pref = context.getSharedPreferences("MyPref", 0);
         int key_name = pref.getInt("key_name", 3);
-
-
         switch (key_name) {
 
             case 0:         // accept all
@@ -94,6 +98,8 @@ public class ServiceReceiver extends BroadcastReceiver {
                     telephony.listen(listener, PhoneStateListener.LISTEN_CALL_STATE);
 
                     telephony.listen(listener, PhoneStateListener.LISTEN_NONE);
+
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -121,6 +127,20 @@ public class ServiceReceiver extends BroadcastReceiver {
         }
 
 
+    }
+
+    public void shared(Context context) {
+
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+        p_calls = sharedPreferences.getBoolean("p_calls", false);
+
+        notification = sharedPreferences.getBoolean("notification", false);
+
+        temple = sharedPreferences.getString("temple", "");
+
+        duration = sharedPreferences.getString("duration", "");
     }
 
     private boolean get_lookup(Context context, String Number) {
@@ -162,7 +182,9 @@ public class ServiceReceiver extends BroadcastReceiver {
                     Contact contact = dataBaseHelper.getContact(remove_plus(phoneNumber));
 
                     if (contact.get_is_Msg_block()) {
-                        notification("Call Blocker", "Message Block " + contact.get_Name());
+                        if (notification) {
+                            notification("Call Blocker", "Message Block " + contact.get_Name());
+                        }
                         abortBroadcast();
                     }
                 }
@@ -206,7 +228,6 @@ public class ServiceReceiver extends BroadcastReceiver {
 
             if (bundle != null) {
 
-
                 abortBroadcast();
             }
 
@@ -240,7 +261,9 @@ public class ServiceReceiver extends BroadcastReceiver {
 
             if (contact.get_is_Call_block()) {
 
-                notification("Call Blocker", "Call Block " + contact.get_Name());
+                if (notification) {
+                    notification("Call Blocker", "Call Block " + contact.get_Name());
+                }
                 all_block();
 
             }
@@ -299,7 +322,6 @@ public class ServiceReceiver extends BroadcastReceiver {
 
     class MyPhoneStateListener extends PhoneStateListener {
 
-
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
 
@@ -316,6 +338,8 @@ public class ServiceReceiver extends BroadcastReceiver {
 
                 case TelephonyManager.CALL_STATE_RINGING:
                     Log.d("DEBUG", "CALL_STATE_RINGING");
+
+
                     Call_Filter(incomingNumber);
 
                     break;
@@ -325,49 +349,12 @@ public class ServiceReceiver extends BroadcastReceiver {
 
     }
 
-    class smsStateListener extends PhoneStateListener {
 
-
-        @Override
-        public void onCallStateChanged(int state, String incomingNumber) {
-
-            switch (state) {
-                case TelephonyManager.CALL_STATE_IDLE:
-                    Log.d("DEBUG", "CALL_STATE_IDLE");
-
-                    break;
-
-                case TelephonyManager.CALL_STATE_OFFHOOK:
-                    Log.d("DEBUG", "CALL_STATE_OFFHOOK");
-
-                    break;
-
-                case TelephonyManager.CALL_STATE_RINGING:
-                    Log.d("DEBUG", "CALL_STATE_RINGING");
-
-//                    SmsManager smsManager = SmsManager.getDefault();
-//                    smsManager.sendTextMessage(incomingNumber, null,"", null, null);
-
-                    break;
-
-            }
-        }
-
-    }
 
     class PhoneStateListeners extends PhoneStateListener {
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
             switch (state) {
-                case TelephonyManager.CALL_STATE_IDLE:
-                    Log.d("DEBUG", "CALL_STATE_IDLE");
-
-                    break;
-
-                case TelephonyManager.CALL_STATE_OFFHOOK:
-                    Log.d("DEBUG", "CALL_STATE_OFFHOOK");
-
-                    break;
 
                 case TelephonyManager.CALL_STATE_RINGING:
 

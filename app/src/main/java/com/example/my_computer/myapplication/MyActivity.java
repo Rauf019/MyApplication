@@ -36,22 +36,19 @@ import java.util.Locale;
 
 public class MyActivity extends ActionBarActivity implements ActionBar.TabListener {
 
-    //rauf
+
     public static FullscreenActivity.Custum_Class Loc_custum_class;
     SectionsPagerAdapter mSectionsPagerAdapter;
     ViewPager mViewPager;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
-        Loc_custum_class = FullscreenActivity.custum_class;
+        super.onCreate(savedInstanceState);
 
         if (Loc_custum_class == null) {
 
             Intent intent = new Intent(this, FullscreenActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
             startActivity(intent);
 
 
@@ -60,8 +57,11 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
             setContentView(R.layout.activity_my);
 
             final ActionBar actionBar = getSupportActionBar();
+
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
             mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+            Loc_custum_class = FullscreenActivity.custum_class;
 
             try {
                 ViewConfiguration config = ViewConfiguration.get(this);
@@ -78,15 +78,13 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
             mViewPager.setAdapter(mSectionsPagerAdapter);
 
 
-
-
             mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
                 @Override
                 public void onPageSelected(int position) {
 
                     actionBar.setSelectedNavigationItem(position);
                     mSectionsPagerAdapter.notifyDataSetChanged();
-            }
+                }
             });
 
 
@@ -97,7 +95,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                                 .setText(mSectionsPagerAdapter.getPageTitle(i))
                                 .setTabListener(this)
                 );
-        }
+            }
 
 
         }
@@ -107,19 +105,19 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
     @Override
     protected void onPause() {
         super.onPause();
-//        finish();
+        finish();
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        //    finish();
+        finish();
 
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+
         getMenuInflater().inflate(R.menu.my, menu);
         return true;
     }

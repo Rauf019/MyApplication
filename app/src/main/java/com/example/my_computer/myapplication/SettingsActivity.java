@@ -3,65 +3,16 @@ package com.example.my_computer.myapplication;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
-import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 
-/**
- * A {@link PreferenceActivity} that presents a set of application settings. On
- * handset devices, settings are presented as a single list. On tablets,
- * settings are split by category, with category headers shown to the left of
- * the list of settings.
- * <p/>
- * See <a href="http://developer.android.com/design/patterns/settings.html">
- * Android Design: Settings</a> for design guidelines and the <a
- * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
- * API Guide</a> for more information on developing a Settings UI.
- */
 public class SettingsActivity extends PreferenceActivity {
-    /**
-     * Determines whether to always show the simplified settings UI, where
-     * settings are presented in a single list. When false, settings are shown
-     * as a master/detail two-pane view on tablets. When true, a single pane is
-     * shown on tablets.
-     */
-    private static final boolean ALWAYS_SIMPLE_PREFS = false;
-
-
-    /**
-     * A preference value change listener that updates the preference's summary
-     * to reflect its new value.
-     */
-
-
-    private static Preference.OnPreferenceClickListener onPreferenceClickListener = new Preference.OnPreferenceClickListener() {
-
-
-        @Override
-        public boolean onPreferenceClick(Preference preference) {
-
-            String key = preference.getKey();
-
-            if (key == "key") {
-
-                Intent emailIntent = new Intent(Intent.ACTION_SEND);
-                emailIntent.setType("text/plain");
-                emailIntent.putExtra(Intent.EXTRA_TEXT, "Hey there! Cheers!");
-                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Try App !" + "its great");
-//               preference. startActivity(Intent.createChooser(emailIntent, "Share via"));
-
-
-                return true;
-
-            }
-
-            return false;
-        }
-    };
 
 
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
@@ -73,8 +24,7 @@ public class SettingsActivity extends PreferenceActivity {
 
 
             if (preference instanceof ListPreference) {
-                // For list preferences, look up the correct display value in
-                // the preference's 'entries' list.
+
                 ListPreference listPreference = (ListPreference) preference;
                 int index = listPreference.findIndexOfValue(stringValue);
 
@@ -85,14 +35,41 @@ public class SettingsActivity extends PreferenceActivity {
                                 : null);
 
 
-            } else if (key == "Key") {
+            } else if (preference instanceof CheckBoxPreference) {
+
+                CheckBoxPreference checkBoxPreference = (CheckBoxPreference) preference;
+                if (checkBoxPreference.isChecked()) {
 
 
-            } else {
-                // For all other preferences, set the summary to the value's
-                // simple string representation.
+                }
+
+
+            } else if (key.equals("key"))
+
+            {
+
+                Intent emailIntent = new Intent(Intent.ACTION_SEND);
+                emailIntent.setType("text/plain");
+                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Try App !" + preference.getContext().getString(R.string.app_name) + "its great");
+                emailIntent.putExtra(Intent.EXTRA_TEXT, "I am using " + preference.getContext().getString(R.string.app_name) + " app  try this app its great !");
+                preference.setIntent((Intent.createChooser(emailIntent, "Share via")));
+
+
+            } else if (key.equals("key1"))
+
+            {
+                Uri uri = Uri.parse("market://details?id=" + preference.getContext().getPackageName());
+                Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
+                preference.setIntent(goToMarket);
+
+
+            } else
+
+            {
+
                 preference.setSummary(stringValue);
             }
+
             return true;
         }
     };
@@ -106,38 +83,24 @@ public class SettingsActivity extends PreferenceActivity {
                 & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
     }
 
-    /**
-     * Determines whether the simplified settings UI should be shown. This is
-     * true if this is forced via {@link #ALWAYS_SIMPLE_PREFS}, or the device
-     * doesn't have newer APIs like {@link PreferenceFragment}, or the device
-     * doesn't have an extra-large screen. In these cases, a single-pane
-     * "simplified" settings UI should be shown.
-     */
-//    private static boolean isSimplePreferences(Context context) {
-//        return ALWAYS_SIMPLE_PREFS
-//                || Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB
-//                || !isXLargeTablet(context);
-//    }
 
-    /**
-     * Binds a preference's summary to its value. More specifically, when the
-     * preference's value is changed, its summary (line of text below the
-     * preference title) is updated to reflect the value. The summary is also
-     * immediately updated upon calling this method. The exact display format is
-     * dependent on the type of preference.
-     *
-     * @see #sBindPreferenceSummaryToValueListener
-     */
     private static void bindPreferenceSummaryToValue(Preference preference) {
-        // Set the listener to watch for value changes.
+
+        try {
+            sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+                    PreferenceManager
+                            .getDefaultSharedPreferences(preference.getContext())
+                            .getString(preference.getKey(), ""));
+        } catch (ClassCastException e) {
+            sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+                    PreferenceManager
+                            .getDefaultSharedPreferences(preference.getContext())
+                            .getBoolean(preference.getKey(), false));
+        }
+
         preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
-        preference.setOnPreferenceClickListener(onPreferenceClickListener);
-        // Trigger the listener immediately with the preference's
-        // current value.
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
-                        .getString(preference.getKey(), ""));
+
+
     }
 
     @Override
@@ -153,47 +116,55 @@ public class SettingsActivity extends PreferenceActivity {
      * shown.
      */
     private void setupSimplePreferencesScreen() {
-//        if (!isSimplePreferences(this)) {
-//            return;
-//        }
 
-        PreferenceCategory fakeHeader;
 
-        addPreferencesFromResource(R.xml.pref_general);
+        try {
+            PreferenceCategory fakeHeader;
 
-        fakeHeader = new PreferenceCategory(this);
-        fakeHeader.setTitle("Calls");
-        getPreferenceScreen().addPreference(fakeHeader);
-        addPreferencesFromResource(R.xml.pref_notification);
+//        addPreferencesFromResource(R.xml.pref_general);
 
-        fakeHeader = new PreferenceCategory(this);
-        fakeHeader.setTitle("Do not distrub");
-        getPreferenceScreen().addPreference(fakeHeader);
-        addPreferencesFromResource(R.xml.do_not);
+//        fakeHeader = new PreferenceCategory(this);
+//        fakeHeader.setTitle("Calls");
+//        getPreferenceScreen().addPreference(fakeHeader);
+            addPreferencesFromResource(R.xml.pref_notification);
 
-        fakeHeader = new PreferenceCategory(this);
-        fakeHeader.setTitle("Share With Us");
-        getPreferenceScreen().addPreference(fakeHeader);
-        addPreferencesFromResource(R.xml.pref_data_sync);
+            fakeHeader = new PreferenceCategory(this);
+            fakeHeader.setTitle("Do not distrub");
+            getPreferenceScreen().addPreference(fakeHeader);
+            addPreferencesFromResource(R.xml.do_not);
 
-        bindPreferenceSummaryToValue(findPreference("key"));
-        bindPreferenceSummaryToValue(findPreference("duration"));
-        bindPreferenceSummaryToValue(findPreference("temple"));
+            fakeHeader = new PreferenceCategory(this);
+            fakeHeader.setTitle("Share with us");
+            getPreferenceScreen().addPreference(fakeHeader);
+            addPreferencesFromResource(R.xml.pref_data_sync);
+
+
+            bindPreferenceSummaryToValue(findPreference("key"));
+            bindPreferenceSummaryToValue(findPreference("key1"));
+            bindPreferenceSummaryToValue(findPreference("notification"));
+            bindPreferenceSummaryToValue(findPreference("duration"));
+            bindPreferenceSummaryToValue(findPreference("temple"));
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
     }
 }
 
-    /**
-     * {@inheritDoc}
-     */
+/**
+ * {@inheritDoc}
+ */
 //    @Override
 //    public boolean onIsMultiPane() {
 //        return isXLargeTablet(this) && !isSimplePreferences(this);
 //    }
 
-    /**
-     * {@inheritDoc}
-     */
+/**
+ * {@inheritDoc}
+ */
 //    @Override
 //    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 //    public void onBuildHeaders(List<Header> target) {
@@ -202,10 +173,10 @@ public class SettingsActivity extends PreferenceActivity {
 //        }
 //    }
 
-    /**
-     * This fragment shows general preferences only. It is used when the
-     * activity is showing a two-pane settings UI.
-     */
+/**
+ * This fragment shows general preferences only. It is used when the
+ * activity is showing a two-pane settings UI.
+ */
 //    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 //    public static class GeneralPreferenceFragment extends PreferenceFragment {
 //        @Override
