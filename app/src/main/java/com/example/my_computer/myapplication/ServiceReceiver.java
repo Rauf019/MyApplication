@@ -15,22 +15,20 @@ import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.PhoneStateListener;
+import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 
 public class ServiceReceiver extends BroadcastReceiver {
 
-
-    static int num;
+    static int num, Mode = -1;
     Context context;
     TelephonyManager telephony;
     DataBaseHelper dataBaseHelper;
@@ -41,24 +39,26 @@ public class ServiceReceiver extends BroadcastReceiver {
     String temple;
     String duration;
 
-
     public void onReceive(Context context, Intent intent) {
 
         this.intent = intent;
         this.context = context;
         dataBaseHelper = new DataBaseHelper(context);
+
         telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         shared(context);
         pref = context.getSharedPreferences("MyPref", 0);
         int key_name = pref.getInt("key_name", 3);
         switch (key_name) {
 
-            case 0:         // accept all
+            case 0:
+                // accept all
 
 
                 break;
 
-            case 1:          // block all
+            case 1:
+                // block all
 
                 try {
                     all_block();
@@ -69,36 +69,34 @@ public class ServiceReceiver extends BroadcastReceiver {
 
                 break;
 
-            case 2:        // allow only contact
+            case 2:
+                // allow only contact
 
 
                 try {
+                    Mode = 0;
                     PhoneStateListeners listener1 = new PhoneStateListeners();
-
                     telephony.listen(listener1, PhoneStateListener.LISTEN_CALL_STATE);
-
                     telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
-
                 break;
-            case 3:     // black list
+            case 3:
+                // black list
 
                 try {
-                    if (intent.getAction() != "android.intent.action.PHONE_STATE") {
 
-                        Sms();
+                    //  android.intent.action.PHONE_STATE
 
+                    if (intent.getAction() == "android.provider.Telephony.SMS_RECEIVED") {
+                        Sms_Filter();
                     }
-
-                    MyPhoneStateListener listener = new MyPhoneStateListener();
-
-                    telephony.listen(listener, PhoneStateListener.LISTEN_CALL_STATE);
-
-                    telephony.listen(listener, PhoneStateListener.LISTEN_NONE);
-
+                    Mode = 1;
+                    PhoneStateListeners listener1 = new PhoneStateListeners();
+                    telephony.listen(listener1, PhoneStateListener.LISTEN_CALL_STATE);
+                    telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -106,10 +104,12 @@ public class ServiceReceiver extends BroadcastReceiver {
 
                 break;
 
-            case 4:   // do not disturb
+            case 4:
+                // do not disturb
 
                 try {
 
+                    Mode = 2;
                     all_block();
                     all_Sms();
                     PhoneStateListeners listener1 = new PhoneStateListeners();
@@ -121,9 +121,8 @@ public class ServiceReceiver extends BroadcastReceiver {
                 }
                 break;
 
-            case 5:  // allow white list
+            default:
                 break;
-
         }
 
 
@@ -164,7 +163,7 @@ public class ServiceReceiver extends BroadcastReceiver {
         return false;
     }
 
-    public void Sms() {
+    public void Sms_Filter() {
 
 
         final Bundle bundle = intent.getExtras();
@@ -222,11 +221,9 @@ public class ServiceReceiver extends BroadcastReceiver {
     public void all_Sms() {
 
 
-        final Bundle bundle = intent.getExtras();
-
         try {
 
-            if (bundle != null) {
+            if (intent.getAction() == "android.provider.Telephony.SMS_RECEIVED") {
 
                 abortBroadcast();
             }
@@ -241,7 +238,7 @@ public class ServiceReceiver extends BroadcastReceiver {
     public void notification(String Not_Title, String text) {
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
-                context).setSmallIcon(R.drawable.call)
+                context).setSmallIcon(R.drawable.icon)
                 .setContentTitle(Not_Title).setContentText(text)
                 .setAutoCancel(true);
         Intent intent = new Intent(context, MyActivity.class);
@@ -264,6 +261,7 @@ public class ServiceReceiver extends BroadcastReceiver {
                 if (notification) {
                     notification("Call Blocker", "Call Block " + contact.get_Name());
                 }
+
                 all_block();
 
             }
@@ -307,49 +305,13 @@ public class ServiceReceiver extends BroadcastReceiver {
             telephonyObject = serviceMethod.invoke(null, retbinder);
             telephonyEndCall = telephonyClass.getMethod("endCall");
             telephonyEndCall.invoke(telephonyObject);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
 
     }
-
-    class MyPhoneStateListener extends PhoneStateListener {
-
-        @Override
-        public void onCallStateChanged(int state, String incomingNumber) {
-
-            switch (state) {
-                case TelephonyManager.CALL_STATE_IDLE:
-                    Log.d("DEBUG", "CALL_STATE_IDLE");
-
-                    break;
-
-                case TelephonyManager.CALL_STATE_OFFHOOK:
-                    Log.d("DEBUG", "CALL_STATE_OFFHOOK");
-
-                    break;
-
-                case TelephonyManager.CALL_STATE_RINGING:
-                    Log.d("DEBUG", "CALL_STATE_RINGING");
-
-
-                    Call_Filter(incomingNumber);
-
-                    break;
-
-            }
-        }
-
-    }
-
-
 
     class PhoneStateListeners extends PhoneStateListener {
         @Override
@@ -358,16 +320,37 @@ public class ServiceReceiver extends BroadcastReceiver {
 
                 case TelephonyManager.CALL_STATE_RINGING:
 
+                    switch (Mode) {
 
-                    if (!((get_lookup(context, incomingNumber)))) {
+                        case 0:
+                            try {
+                                if (!((get_lookup(context, incomingNumber)))) {
 
-                        all_block();
-                        all_Sms();
+                                    all_block();
+                                    all_Sms();
 
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+
+                            break;
+                        case 1:
+                            Call_Filter(incomingNumber);
+                            break;
+                        case 2:
+                            try {
+                                SmsManager smsManager = SmsManager.getDefault();
+                                smsManager.sendTextMessage(incomingNumber, null, temple + " " + duration, null, null);
+
+                            } catch (Exception e) {
+
+                                e.printStackTrace();
+                            }
+                            break;
                     }
-
                     break;
-
             }
 
         }

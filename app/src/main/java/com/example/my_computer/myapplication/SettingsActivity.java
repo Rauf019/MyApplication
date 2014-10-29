@@ -127,16 +127,16 @@ public class SettingsActivity extends PreferenceActivity {
 //        fakeHeader.setTitle("Calls");
 //        getPreferenceScreen().addPreference(fakeHeader);
             addPreferencesFromResource(R.xml.pref_notification);
-
-            fakeHeader = new PreferenceCategory(this);
-            fakeHeader.setTitle("Do not distrub");
-            getPreferenceScreen().addPreference(fakeHeader);
-            addPreferencesFromResource(R.xml.do_not);
-
-            fakeHeader = new PreferenceCategory(this);
-            fakeHeader.setTitle("Share with us");
-            getPreferenceScreen().addPreference(fakeHeader);
-            addPreferencesFromResource(R.xml.pref_data_sync);
+//
+//            fakeHeader = new PreferenceCategory(this);
+//            fakeHeader.setTitle("Do not distrub");
+//            getPreferenceScreen().addPreference(fakeHeader);
+//            addPreferencesFromResource(R.xml.do_not);
+//
+//            fakeHeader = new PreferenceCategory(this);
+//            fakeHeader.setTitle("Share with us");
+//            getPreferenceScreen().addPreference(fakeHeader);
+//            addPreferencesFromResource(R.xml.pref_data_sync);
 
 
             bindPreferenceSummaryToValue(findPreference("key"));

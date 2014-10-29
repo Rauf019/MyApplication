@@ -2,14 +2,53 @@
 
 
     <CheckBoxPreference
+        android:defaultValue="false"
         android:key="p_calls"
         android:summary="Block private numbers "
         android:title="Private numbers" />
 
     <CheckBoxPreference
+        android:defaultValue="true"
         android:key="notification"
         android:summary="Notification me when call or message blocked"
         android:title="Notification" />
 
+    <PreferenceCategory android:title="Do Not Distrub">
+        <EditTextPreference
+            android:layout_width="wrap_content"
+            android:defaultValue="Hi I am busy right now i will call you after"
+            android:ems="4"
+            android:inputType="text"
+            android:key="temple"
+            android:maxEms="4"
 
+            android:summary="Enter text template"
+            android:title="Text template"
+
+            />
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/duration"
+            android:entryValues="@array/duration"
+            android:key="duration"
+            android:summary="Enter time duration "
+            android:title="Duration"
+
+
+            />
+    </PreferenceCategory>
+
+
+    <PreferenceCategory android:title="Share With Us">
+        <Preference
+            android:key="key"
+            android:summary="Do you want to share this app with your friends"
+            android:title="Share"></Preference>
+
+
+        <Preference
+            android:key="key1"
+            android:summary="Do you like our app?"
+            android:title="Submit review"></Preference>
+    </PreferenceCategory>
 </PreferenceScreen>

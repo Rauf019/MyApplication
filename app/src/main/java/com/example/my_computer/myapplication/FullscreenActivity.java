@@ -7,17 +7,18 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 
@@ -47,10 +48,23 @@ public class FullscreenActivity extends Activity {
 
         setContentView(R.layout.activity_fullscreen);
 
-        execute = new Task().execute();
+        execute = new Task();
+        startMyTask(execute);
 
 
     }
+
+
+    void startMyTask(AsyncTask asyncTask) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+            asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+
+        else
+
+            asyncTask.execute();
+    }
+
 
     private HashMap<String, String> get_lookup(Context context, String Number) {
 
@@ -105,6 +119,10 @@ public class FullscreenActivity extends Activity {
     class Task extends AsyncTask<Void, Integer, Custum_Class> {
 
         int Total_count, dec_count;
+        LinkedHashMap<String, Read_contacts> List_Read_sms = null;
+        LinkedHashMap<String, Read_contacts> List_Read_contacts = null;
+        LinkedHashMap<String, Read_contacts> List_Read_call_logs = null;
+
 
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar1);
 
@@ -120,19 +138,17 @@ public class FullscreenActivity extends Activity {
         protected Custum_Class doInBackground(Void... urls) {
             try {
 
-                ArrayList<Read_contacts> List_Read_sms = null;
-                ArrayList<Read_contacts> List_Read_contacts = null;
-                ArrayList<Read_contacts> List_Read_call_logs = null;
 
                 ContentResolver cr = getApplicationContext().getContentResolver();
 
-                Cursor cursor = cr.query(Uri.parse("content://sms/"), null, null, null, null);
+
+                Cursor cursor = cr.query(Uri.parse("content://sms/"), new String[]{"address"}, null, null, null);
 
                 Cursor cursor1 = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null,
                         ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
 
-                Cursor cursor2 = cr.query(Uri.parse("content://call_log/calls"),
-                        null, null, null, null);
+                Cursor cursor2 = cr.query(CallLog.Calls.CONTENT_URI, new String[]{"number", "name"}
+                        , null, null, null);
 
 
                 Total_count = cursor.getCount() + cursor1.getCount() + cursor2.getCount();
@@ -145,7 +161,7 @@ public class FullscreenActivity extends Activity {
 
                 cursor2.moveToFirst();
 
-                List_Read_sms = new ArrayList<Read_contacts>();
+                List_Read_sms = new LinkedHashMap<String, Read_contacts>();
 
                 do {
 
@@ -154,7 +170,7 @@ public class FullscreenActivity extends Activity {
 
                     HashMap<String, String> lookup = get_lookup(getApplicationContext(), Number);
 
-                    List_Read_sms.add(new Read_contacts(lookup.get("Name"),
+                    List_Read_sms.put(Number, new Read_contacts(lookup.get("Name"),
                                     Number,
                                     lookup.get("Photo_url"))
                     );
@@ -165,14 +181,14 @@ public class FullscreenActivity extends Activity {
                 cursor.close();
 
 
-                List_Read_contacts = new ArrayList<Read_contacts>();
+                List_Read_contacts = new LinkedHashMap<String, Read_contacts>();
 
 
                 do {
                     String string = cursor1.getString(cursor1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
                     String string1 = cursor1.getString(cursor1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                     String string13 = cursor1.getString(cursor1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_URI));
-                    List_Read_contacts.add(new Read_contacts(string,
+                    List_Read_contacts.put(string1, new Read_contacts(string,
                             string1,
                             string13));
 
@@ -185,14 +201,14 @@ public class FullscreenActivity extends Activity {
                 cursor1.close();
 
 
-                List_Read_call_logs = new ArrayList<Read_contacts>();
+                List_Read_call_logs = new LinkedHashMap<String, Read_contacts>();
 
                 do {
                     String string = cursor2.getString(cursor2.getColumnIndex(CallLog.Calls.NUMBER));
                     HashMap<String, String> lookup = get_lookup(getApplicationContext(), string);
 
 
-                    List_Read_call_logs.add(new Read_contacts(cursor2.getString(cursor2.getColumnIndex(CallLog.Calls.CACHED_NAME)),
+                    List_Read_call_logs.put(string, new Read_contacts(cursor2.getString(cursor2.getColumnIndex(CallLog.Calls.CACHED_NAME)),
                             string,
 
                             lookup.get("Photo_url")));
@@ -204,12 +220,12 @@ public class FullscreenActivity extends Activity {
 
                 cursor2.close();
 
-                return new Custum_Class(List_Read_sms, List_Read_call_logs, List_Read_contacts);
+                return new Custum_Class(new ArrayList<Read_contacts>(List_Read_sms.values()), new ArrayList<Read_contacts>(List_Read_call_logs.values()), new ArrayList<Read_contacts>(List_Read_contacts.values()));
 
             } catch (Exception e) {
 
-                Toast.makeText(getApplicationContext(), "Unable to get Data", Toast.LENGTH_SHORT).show();
-                return custum_class;
+
+                return null;
 
             }
         }
@@ -219,12 +235,14 @@ public class FullscreenActivity extends Activity {
 
             super.onPostExecute(aClass);
 
-            custum_class = aClass;
-            custum_class.is_intialize = true;
-            Intent intent
-                    = new Intent(getApplicationContext(), MyActivity.class);
+            if (aClass != null) {
+                custum_class = aClass;
+                custum_class.is_intialize = true;
+                Intent intent
+                        = new Intent(getApplicationContext(), MyActivity.class);
 
-            startActivity(intent);
+                startActivity(intent);
+            }
 
         }
 
@@ -233,40 +251,30 @@ public class FullscreenActivity extends Activity {
 
     class Custum_Class {
 
-        List<Read_contacts> read_smses;
-        List<Read_contacts> read_call_logs;
-        List<Read_contacts> read_contactses;
+
+        private final List<Read_contacts> sms_list;
+        private final List<Read_contacts> callLog_list;
+        private final List<Read_contacts> contact_list;
         boolean is_intialize;
 
-        public Custum_Class(List<Read_contacts> read_smses, List<Read_contacts> read_call_logs, List<Read_contacts> read_contactses) {
-            this.read_smses = read_smses;
-            this.read_call_logs = read_call_logs;
-            this.read_contactses = read_contactses;
+
+        public Custum_Class(List<Read_contacts> Sms_list, List<Read_contacts> CallLog_list, List<Read_contacts> Contact_list) {
+
+            sms_list = Sms_list;
+            callLog_list = CallLog_list;
+            contact_list = Contact_list;
         }
 
-
-        public List<Read_contacts> getRead_smses() {
-            return read_smses;
+        public List<Read_contacts> getSms_list() {
+            return sms_list;
         }
 
-        public void setRead_smses(List<Read_contacts> read_smses) {
-            this.read_smses = read_smses;
+        public List<Read_contacts> getCallLog_list() {
+            return callLog_list;
         }
 
-        public List<Read_contacts> getRead_call_logs() {
-            return read_call_logs;
-        }
-
-        public void setRead_call_logs(List<Read_contacts> read_call_logs) {
-            this.read_call_logs = read_call_logs;
-        }
-
-        public List<Read_contacts> getRead_contactses() {
-            return read_contactses;
-        }
-
-        public void setRead_contactses(List<Read_contacts> read_contactses) {
-            this.read_contactses = read_contactses;
+        public List<Read_contacts> getContact_list() {
+            return contact_list;
         }
 
 

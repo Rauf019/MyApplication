@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -25,10 +26,12 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.etsy.android.grid.StaggeredGridView;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -40,17 +43,21 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
     public static FullscreenActivity.Custum_Class Loc_custum_class;
     SectionsPagerAdapter mSectionsPagerAdapter;
     ViewPager mViewPager;
+    private boolean doubleBackToExitPressedOnce;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
+
+        Loc_custum_class = FullscreenActivity.custum_class;
+
         if (Loc_custum_class == null) {
 
             Intent intent = new Intent(this, FullscreenActivity.class);
             startActivity(intent);
-
+            finish();
 
         } else if (Loc_custum_class.is_intialize) {
 
@@ -61,7 +68,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
             mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-            Loc_custum_class = FullscreenActivity.custum_class;
+
 
             try {
                 ViewConfiguration config = ViewConfiguration.get(this);
@@ -105,13 +112,28 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
     @Override
     protected void onPause() {
         super.onPause();
-        finish();
+
     }
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        finish();
+        //   super.onBackPressed();
+
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed();
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce = false;
+            }
+        }, 2000);
 
     }
 
@@ -144,36 +166,23 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                             switch (which) {
 
                                 case 0:
-
-//                getApplicationContext().getPackageManager().setComponentEnabledSetting(new ComponentName(getApplicationContext(), ServiceReceiver.class),
-//                        PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
                                     dialog.dismiss();
                                     break;
                                 case 1:
-
-
                                     dialog.dismiss();
                                     break;
                                 case 2:
-
                                     dialog.dismiss();
                                     break;
                                 case 3:
-//
-//                getApplicationContext().getPackageManager().setComponentEnabledSetting(new ComponentName(getApplicationContext(), ServiceReceiver.class),
-//                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
-
                                     dialog.dismiss();
                                     break;
                                 case 4:
-
                                     dialog.dismiss();
                                     break;
-                                case 5:
 
-                                    dialog.dismiss();
-                                    break;
                             }
+
                             editor.putInt("key_name", which);
                             editor.commit();
                         }
@@ -212,19 +221,29 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
     }
 
+
     public static class Contact_Frag extends Fragment {
         private static final String ARG_SECTION_NUMBER = "section_number";
-        static int pre_loc;
-        static boolean pre_loc_val;
-        Adapter myArrayAdapter = null;
+        public ListView listView;
         DataBaseHelper dataBaseHelper;
+        ArrayList<Read_contacts> List_Read_contacts;
+        View rootView;
+        Adapter adapter;
 
         public static Contact_Frag newInstance(int sectionNumber) {
             Contact_Frag fragment = new Contact_Frag();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
+
             return fragment;
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            List_Read_contacts = new ArrayList<Read_contacts>();
+
         }
 
         @Override
@@ -232,16 +251,17 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                                  Bundle savedInstanceState) {
 
 
-            View rootView = inflater.inflate(R.layout.list, container, false);
-            dataBaseHelper = new DataBaseHelper(getActivity());
-//            final SwipeListView swipelistview = (SwipeListView) rootView.findViewById(R.id.example_swipe_lv_list);
-            ListView listView = (ListView) rootView.findViewById(R.id.listView);
-
             try {
-                if (Loc_custum_class.getRead_contactses() != null) {
+                if (Loc_custum_class.getContact_list() != null) {
 
 
-                    Adapter adapter = new Adapter(getActivity(), Loc_custum_class.getRead_contactses());
+                    rootView = inflater.inflate(R.layout.list, container, false);
+                    dataBaseHelper = new DataBaseHelper(getActivity());
+
+                    listView = (ListView) rootView.findViewById(R.id.listView);
+
+                    adapter = new Adapter(getActivity(), Loc_custum_class.getContact_list());
+
 
                     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -264,7 +284,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
                             String[] toppings = {"Call", "Message", "Both"};
-                            builder.setTitle(String.format("%s \n %s ( %s ) ", "Block ", itemAtPosition.getName(), itemAtPosition.getNumber()))
+                            builder.setTitle(String.format("%s\n%s ( %s ) ", "Block ", ((itemAtPosition.getName() != null) ? itemAtPosition.getName() : ""), itemAtPosition.getNumber()))
 
                                     .setMultiChoiceItems(toppings, null,
                                             new DialogInterface.OnMultiChoiceClickListener() {
@@ -376,8 +396,8 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
             ListView listView = (ListView) rootView.findViewById(R.id.listView);
 
             try {
-                if (Loc_custum_class.getRead_call_logs() != null) {
-                    adapter = new Adapter(getActivity(), Loc_custum_class.getRead_call_logs());
+                if (Loc_custum_class.getCallLog_list() != null) {
+                    adapter = new Adapter(getActivity(), Loc_custum_class.getCallLog_list());
 
 
                     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -400,7 +420,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
                             String[] toppings = {"Call", "Message", "Both"};
-                            builder.setTitle(String.format("%s \n %s ( %s ) ", "Block ", itemAtPosition.getName(), itemAtPosition.getNumber()))
+                            builder.setTitle(String.format("%s \n %s ( %s ) ", "Block ", (itemAtPosition.getName() != null) ? itemAtPosition.getName() : "", itemAtPosition.getNumber()))
                                     .setMultiChoiceItems(toppings, null,
                                             new DialogInterface.OnMultiChoiceClickListener() {
                                                 @Override
@@ -519,8 +539,8 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
 
             try {
-                if (Loc_custum_class.getRead_smses() != null) {
-                    adapter = new Adapter(getActivity(), Loc_custum_class.getRead_smses());
+                if (Loc_custum_class.getSms_list() != null) {
+                    adapter = new Adapter(getActivity(), Loc_custum_class.getSms_list());
 
                 }
 
@@ -545,7 +565,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
                         String[] toppings = {"Call", "Message", "Both"};
-                        builder.setTitle(String.format("%s\n %s ( %s ) ", "Block ", itemAtPosition.getName(), itemAtPosition.getNumber()))
+                        builder.setTitle(String.format("%s\n %s ( %s ) ", "Block ", (itemAtPosition.getName() != null) ? itemAtPosition.getName() : "", itemAtPosition.getNumber()))
 
                                 .setMultiChoiceItems(toppings, null,
                                         new DialogInterface.OnMultiChoiceClickListener() {
@@ -744,6 +764,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
             LetterImageView letterImageView;
 
         }
+
     }
 
     public class SectionsPagerAdapter extends FragmentStatePagerAdapter {
