@@ -120,7 +120,7 @@ public class FullscreenActivity extends Activity {
 
         int Total_count, dec_count;
         LinkedHashMap<String, Read_contacts> List_Read_sms = null;
-        LinkedHashMap<String, Read_contacts> List_Read_contacts = null;
+        List<Read_contacts> List_Read_contacts = null;
         LinkedHashMap<String, Read_contacts> List_Read_call_logs = null;
 
 
@@ -181,14 +181,14 @@ public class FullscreenActivity extends Activity {
                 cursor.close();
 
 
-                List_Read_contacts = new LinkedHashMap<String, Read_contacts>();
+                List_Read_contacts = new ArrayList<Read_contacts>();
 
 
                 do {
                     String string = cursor1.getString(cursor1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
                     String string1 = cursor1.getString(cursor1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                     String string13 = cursor1.getString(cursor1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_URI));
-                    List_Read_contacts.put(string1, new Read_contacts(string,
+                    List_Read_contacts.add(new Read_contacts(string,
                             string1,
                             string13));
 
@@ -220,7 +220,9 @@ public class FullscreenActivity extends Activity {
 
                 cursor2.close();
 
-                return new Custum_Class(new ArrayList<Read_contacts>(List_Read_sms.values()), new ArrayList<Read_contacts>(List_Read_call_logs.values()), new ArrayList<Read_contacts>(List_Read_contacts.values()));
+                return new Custum_Class(new ArrayList<Read_contacts>(List_Read_sms.values())
+                        , new ArrayList<Read_contacts>(List_Read_call_logs.values())
+                        , List_Read_contacts);
 
             } catch (Exception e) {
 

@@ -47,9 +47,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
-
 
         Loc_custum_class = FullscreenActivity.custum_class;
 
@@ -109,11 +107,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
 
-    }
 
     @Override
     public void onBackPressed() {
@@ -256,8 +250,8 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
 
                     rootView = inflater.inflate(R.layout.list, container, false);
-                    dataBaseHelper = new DataBaseHelper(getActivity());
 
+                    dataBaseHelper = new DataBaseHelper(getActivity());
                     listView = (ListView) rootView.findViewById(R.id.listView);
 
                     adapter = new Adapter(getActivity(), Loc_custum_class.getContact_list());
@@ -284,7 +278,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
                             String[] toppings = {"Call", "Message", "Both"};
-                            builder.setTitle(String.format("%s\n%s ( %s ) ", "Block ", ((itemAtPosition.getName() != null) ? itemAtPosition.getName() : ""), itemAtPosition.getNumber()))
+                            builder.setTitle(String.format("%s\n%s ( %s )", "Block ", ((itemAtPosition.getName() != null) ? itemAtPosition.getName() : ""), itemAtPosition.getNumber()))
 
                                     .setMultiChoiceItems(toppings, null,
                                             new DialogInterface.OnMultiChoiceClickListener() {
@@ -420,7 +414,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
                             String[] toppings = {"Call", "Message", "Both"};
-                            builder.setTitle(String.format("%s \n %s ( %s ) ", "Block ", (itemAtPosition.getName() != null) ? itemAtPosition.getName() : "", itemAtPosition.getNumber()))
+                            builder.setTitle(String.format("%s\n%s ( %s )", "Block ", (itemAtPosition.getName() != null) ? itemAtPosition.getName() : "", itemAtPosition.getNumber()))
                                     .setMultiChoiceItems(toppings, null,
                                             new DialogInterface.OnMultiChoiceClickListener() {
                                                 @Override
@@ -542,10 +536,8 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                 if (Loc_custum_class.getSms_list() != null) {
                     adapter = new Adapter(getActivity(), Loc_custum_class.getSms_list());
 
-                }
 
-
-                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
@@ -565,7 +557,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
                         String[] toppings = {"Call", "Message", "Both"};
-                        builder.setTitle(String.format("%s\n %s ( %s ) ", "Block ", (itemAtPosition.getName() != null) ? itemAtPosition.getName() : "", itemAtPosition.getNumber()))
+                        builder.setTitle(String.format("%s\n%s ( %s )", "Block ", (itemAtPosition.getName() != null) ? itemAtPosition.getName() : "", itemAtPosition.getNumber()))
 
                                 .setMultiChoiceItems(toppings, null,
                                         new DialogInterface.OnMultiChoiceClickListener() {
@@ -636,7 +628,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                     }
                 });
 
-
+                }
                 listView.setAdapter(adapter);
             } catch (Exception e) {
                 e.printStackTrace();

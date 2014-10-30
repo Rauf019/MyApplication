@@ -16,18 +16,15 @@
     <PreferenceCategory android:title="Do Not Distrub">
         <EditTextPreference
             android:layout_width="wrap_content"
-            android:defaultValue="Hi I am busy right now i will call you after"
-            android:ems="4"
+            android:defaultValue="Hi i am busy right now i will call you after"
             android:inputType="text"
             android:key="temple"
-            android:maxEms="4"
-
             android:summary="Enter text template"
             android:title="Text template"
 
             />
         <ListPreference
-            android:defaultValue="1"
+            android:defaultValue="15 minutes"
             android:entries="@array/duration"
             android:entryValues="@array/duration"
             android:key="duration"

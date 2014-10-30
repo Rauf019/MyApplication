@@ -47,28 +47,7 @@
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
             android:screenOrientation="portrait"></activity>
-        <!--<activity-->
-        <!--android:screenOrientation="portrait"-->
-        <!--android:name=".Share"-->
-        <!--android:label="@string/title_activity_share">-->
-        <!--<intent-filter>-->
-        <!--<action android:name="com.example.my_computer.myapplication.Share" />-->
 
-        <!--<category android:name="android.intent.category.DEFAULT" />-->
-        <!--</intent-filter>-->
-        <!--</activity>-->
-        <!--<activity-->
-        <!--android:screenOrientation="portrait"-->
-        <!--android:name=".Review"-->
-        <!--android:label="@string/title_activity_review">-->
-        <!--<intent-filter>-->
-        <!--<action android:name="com.example.my_computer.myapplication.Review" />-->
-        <!--<category android:name="android.intent.category.DEFAULT" />-->
-
-        <!--</intent-filter>-->
-
-
-        <!--</activity>-->
     </application>
 
 </manifest>

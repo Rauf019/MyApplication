@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.my_computer.myapplication"
-        minSdkVersion 10
+        minSdkVersion 11
         targetSdkVersion 18
         versionCode 1
         versionName "1.0"
@@ -32,9 +32,6 @@ dependencies {
     compile('com.fortysevendeg.swipelistview:swipelistview:1.0-SNAPSHOT@aar') {
         transitive = true
     }
-
-
-
     compile 'com.android.support:appcompat-v7:20.0.0'
     compile 'com.etsy.android.grid:library:1.0.5'
     compile 'com.android.support:support-v4:20.0.0'

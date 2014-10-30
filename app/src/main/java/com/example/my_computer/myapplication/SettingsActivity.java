@@ -1,16 +1,13 @@
 package com.example.my_computer.myapplication;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceCategory;
 import android.preference.PreferenceManager;
+
 
 public class SettingsActivity extends PreferenceActivity {
 
@@ -27,21 +24,10 @@ public class SettingsActivity extends PreferenceActivity {
 
                 ListPreference listPreference = (ListPreference) preference;
                 int index = listPreference.findIndexOfValue(stringValue);
-
-                // Set the summary to reflect the new value.
                 preference.setSummary(
                         index >= 0
                                 ? listPreference.getEntries()[index]
                                 : null);
-
-
-            } else if (preference instanceof CheckBoxPreference) {
-
-                CheckBoxPreference checkBoxPreference = (CheckBoxPreference) preference;
-                if (checkBoxPreference.isChecked()) {
-
-
-                }
 
 
             } else if (key.equals("key"))
@@ -50,7 +36,7 @@ public class SettingsActivity extends PreferenceActivity {
 
                 Intent emailIntent = new Intent(Intent.ACTION_SEND);
                 emailIntent.setType("text/plain");
-                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Try App !" + preference.getContext().getString(R.string.app_name) + "its great");
+                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Try App ! " + preference.getContext().getString(R.string.app_name) + " its great");
                 emailIntent.putExtra(Intent.EXTRA_TEXT, "I am using " + preference.getContext().getString(R.string.app_name) + " app  try this app its great !");
                 preference.setIntent((Intent.createChooser(emailIntent, "Share via")));
 
@@ -66,23 +52,12 @@ public class SettingsActivity extends PreferenceActivity {
             } else
 
             {
-
                 preference.setSummary(stringValue);
             }
 
             return true;
         }
     };
-
-    /**
-     * Helper method to determine if the device has an extra-large screen. For
-     * example, 10" tablets are extra-large.
-     */
-    private static boolean isXLargeTablet(Context context) {
-        return (context.getResources().getConfiguration().screenLayout
-                & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
-    }
-
 
     private static void bindPreferenceSummaryToValue(Preference preference) {
 
@@ -110,16 +85,12 @@ public class SettingsActivity extends PreferenceActivity {
         setupSimplePreferencesScreen();
     }
 
-    /**
-     * Shows the simplified settings UI if the device configuration if the
-     * device configuration dictates that a simplified, single-pane UI should be
-     * shown.
-     */
+
     private void setupSimplePreferencesScreen() {
 
 
         try {
-            PreferenceCategory fakeHeader;
+
 
 //        addPreferencesFromResource(R.xml.pref_general);
 
@@ -141,7 +112,6 @@ public class SettingsActivity extends PreferenceActivity {
 
             bindPreferenceSummaryToValue(findPreference("key"));
             bindPreferenceSummaryToValue(findPreference("key1"));
-            bindPreferenceSummaryToValue(findPreference("notification"));
             bindPreferenceSummaryToValue(findPreference("duration"));
             bindPreferenceSummaryToValue(findPreference("temple"));
 

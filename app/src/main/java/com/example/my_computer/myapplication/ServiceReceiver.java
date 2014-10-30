@@ -61,7 +61,7 @@ public class ServiceReceiver extends BroadcastReceiver {
                 // block all
 
                 try {
-                    all_block();
+                    all_Call();
                     all_Sms();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -110,7 +110,7 @@ public class ServiceReceiver extends BroadcastReceiver {
                 try {
 
                     Mode = 2;
-                    all_block();
+                    all_Call();
                     all_Sms();
                     PhoneStateListeners listener1 = new PhoneStateListeners();
                     telephony.listen(listener1, PhoneStateListener.LISTEN_CALL_STATE);
@@ -130,10 +130,14 @@ public class ServiceReceiver extends BroadcastReceiver {
 
     public void shared(Context context) {
 
+//        SharedPreferences.Editor editor =  PreferenceManager.getDefaultSharedPreferences(context).edit();
+//        editor.putInt(getString(R.string.saved_high_score), newHighScore);
+//        editor.commit();
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         p_calls = sharedPreferences.getBoolean("p_calls", false);
+
 
         notification = sharedPreferences.getBoolean("notification", false);
 
@@ -262,7 +266,7 @@ public class ServiceReceiver extends BroadcastReceiver {
                     notification("Call Blocker", "Call Block " + contact.get_Name());
                 }
 
-                all_block();
+                all_Call();
 
             }
         } catch (Exception e) {
@@ -273,7 +277,7 @@ public class ServiceReceiver extends BroadcastReceiver {
         }
     }
 
-    public void all_block() {
+    public void all_Call() {
 
         String serviceManagerName = "android.os.ServiceManager";
         String serviceManagerNativeName = "android.os.ServiceManagerNative";
@@ -316,9 +320,12 @@ public class ServiceReceiver extends BroadcastReceiver {
     class PhoneStateListeners extends PhoneStateListener {
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
-            switch (state) {
 
-                case TelephonyManager.CALL_STATE_RINGING:
+
+            if (state == TelephonyManager.CALL_STATE_RINGING) {
+
+                if (Integer.parseInt(incomingNumber) > 0) {
+
 
                     switch (Mode) {
 
@@ -326,7 +333,7 @@ public class ServiceReceiver extends BroadcastReceiver {
                             try {
                                 if (!((get_lookup(context, incomingNumber)))) {
 
-                                    all_block();
+                                    all_Call();
                                     all_Sms();
 
                                 }
@@ -350,7 +357,12 @@ public class ServiceReceiver extends BroadcastReceiver {
                             }
                             break;
                     }
-                    break;
+                } else if (p_calls) {
+                    all_Sms();
+                    all_Call();
+                    ;
+
+                }
             }
 
         }
