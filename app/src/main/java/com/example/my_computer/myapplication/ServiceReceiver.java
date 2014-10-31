@@ -39,19 +39,24 @@ public class ServiceReceiver extends BroadcastReceiver {
     String temple;
     String duration;
 
-
     public void onReceive(Context context, Intent intent) {
 
         this.intent = intent;
         this.context = context;
         dataBaseHelper = new DataBaseHelper(context);
         String action = intent.getAction();
-
-
         telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         shared(context);
+
         pref = context.getSharedPreferences("MyPref", 0);
+
         int key_name = pref.getInt("key_name", 3);
+
+//     if(action.equals("android.intent.action.NEW_OUTGOING_CALL")){
+//
+//
+//     }
+
         switch (key_name) {
 
             case 0:      // accept all
@@ -63,9 +68,9 @@ public class ServiceReceiver extends BroadcastReceiver {
 
 
                 try {
+
                     all_Call();
                     all_Sms();
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -77,13 +82,17 @@ public class ServiceReceiver extends BroadcastReceiver {
 
                 try {
 
-                    Contact_StateListeners listener1 = new Contact_StateListeners();
-                    telephony.listen(listener1, PhoneStateListener.LISTEN_CALL_STATE);
+
+                    Contact_StateListeners llistener1 = new Contact_StateListeners();
+                    telephony.listen(llistener1, PhoneStateListener.LISTEN_CALL_STATE);
+                    telephony.listen(llistener1, PhoneStateListener.LISTEN_NONE);
+
+
                     //           telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
 
                 } catch (Exception e) {
                     e.printStackTrace();
-                }
+                    }
 
                 break;
             case 3:          // black list
@@ -100,7 +109,7 @@ public class ServiceReceiver extends BroadcastReceiver {
 
                     Call_Filter_StateListeners listener1 = new Call_Filter_StateListeners();
                     telephony.listen(listener1, PhoneStateListener.LISTEN_CALL_STATE);
-                    //         telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
+                    telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -118,7 +127,7 @@ public class ServiceReceiver extends BroadcastReceiver {
                     all_Sms_with_reply();
                     Do_not_Dis_StateListeners listener1 = new Do_not_Dis_StateListeners();
                     telephony.listen(listener1, PhoneStateListener.LISTEN_CALL_STATE);
-                    //   telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
+                    telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -128,8 +137,7 @@ public class ServiceReceiver extends BroadcastReceiver {
             default:
                 break;
         }
-
-    }
+        }
 
     public void shared(Context context) {
 

@@ -249,6 +249,8 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
 
             try {
+
+
                 if (Loc_custum_class.getContact_list() != null) {
 
 
@@ -636,8 +638,6 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-
             return rootView;
 
         }
