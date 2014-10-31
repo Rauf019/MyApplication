@@ -47,97 +47,94 @@ public class ServiceReceiver extends BroadcastReceiver {
         String action = intent.getAction();
         telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         shared(context);
-
         pref = context.getSharedPreferences("MyPref", 0);
-
         int key_name = pref.getInt("key_name", 3);
 
-//     if(action.equals("android.intent.action.NEW_OUTGOING_CALL")){
-//
-//
-//     }
 
-        switch (key_name) {
-
-            case 0:      // accept all
+        if (!(action.equals("android.intent.action.NEW_OUTGOING_CALL"))) {
 
 
-                break;
+            switch (key_name) {
 
-            case 1:        // block all
-
-
-                try {
-
-                    all_Call();
-                    all_Sms();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                break;
-
-            case 2:     // allow only contact
+                case 0:      // accept all
 
 
-                try {
+                    break;
 
+                case 1:        // block all
 
-                    Contact_StateListeners llistener1 = new Contact_StateListeners();
-                    telephony.listen(llistener1, PhoneStateListener.LISTEN_CALL_STATE);
-                    telephony.listen(llistener1, PhoneStateListener.LISTEN_NONE);
+                    try {
 
-
-                    //           telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
+                        all_Call();
+                        all_Sms();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
 
-                break;
-            case 3:          // black list
+                    break;
+
+                case 2:     // allow only contact
 
 
-                try {
+                    try {
 
-                    //  android.intent.action.PHONE_STATE
 
-                    if (intent.getAction() == "android.provider.Telephony.SMS_RECEIVED") {
-                        Sms_Filter();
+                        Contact_StateListeners llistener1 = new Contact_StateListeners();
+                        telephony.listen(llistener1, PhoneStateListener.LISTEN_CALL_STATE);
+                        telephony.listen(llistener1, PhoneStateListener.LISTEN_NONE);
+
+
+                        //           telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
 
-
-                    Call_Filter_StateListeners listener1 = new Call_Filter_StateListeners();
-                    telephony.listen(listener1, PhoneStateListener.LISTEN_CALL_STATE);
-                    telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                break;
-
-            case 4:
-                // do not disturb
-
-                try {
+                    break;
+                case 3:          // black list
 
 
-                    all_Call();
-                    all_Sms_with_reply();
-                    Do_not_Dis_StateListeners listener1 = new Do_not_Dis_StateListeners();
-                    telephony.listen(listener1, PhoneStateListener.LISTEN_CALL_STATE);
-                    telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
+                    try {
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
+                        //  android.intent.action.PHONE_STATE
 
-            default:
-                break;
+                        if (intent.getAction() == "android.provider.Telephony.SMS_RECEIVED") {
+                            Sms_Filter();
+                        }
+
+
+                        Call_Filter_StateListeners listener1 = new Call_Filter_StateListeners();
+                        telephony.listen(listener1, PhoneStateListener.LISTEN_CALL_STATE);
+                        telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    break;
+
+                case 4:
+                    // do not disturb
+
+                    try {
+
+
+                        all_Call();
+                        all_Sms_with_reply();
+                        Do_not_Dis_StateListeners listener1 = new Do_not_Dis_StateListeners();
+                        telephony.listen(listener1, PhoneStateListener.LISTEN_CALL_STATE);
+                        telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+
+                default:
+                    break;
+            }
         }
-        }
+    }
 
     public void shared(Context context) {
 
