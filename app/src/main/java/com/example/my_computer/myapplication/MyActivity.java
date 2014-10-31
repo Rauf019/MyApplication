@@ -49,15 +49,17 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
         Loc_custum_class = FullscreenActivity.custum_class;
 
-        if (Loc_custum_class == null) {
+//        if (Loc_custum_class == null) {
+//
+//            Intent intent = new Intent(this, FullscreenActivity.class);
+//            startActivity(intent);
+//            finish();
+//
+//        } else if (Loc_custum_class.is_intialize) {
 
-            Intent intent = new Intent(this, FullscreenActivity.class);
-            startActivity(intent);
-            finish();
-
-        } else if (Loc_custum_class.is_intialize) {
 
             setContentView(R.layout.activity_my);
 
@@ -65,7 +67,8 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-            mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
 
             try {
@@ -105,8 +108,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
         }
 
-    }
-
+//    }
 
 
     @Override
@@ -137,6 +139,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
         getMenuInflater().inflate(R.menu.my, menu);
         return true;
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -538,95 +541,95 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
 
                     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
 
-                        final Read_contacts itemAtPosition = (Read_contacts) parent.getItemAtPosition(position);
+                            final Read_contacts itemAtPosition = (Read_contacts) parent.getItemAtPosition(position);
 
 
-                        Contact contact = dataBaseHelper.getContact(itemAtPosition.getNumber());
+                            Contact contact = dataBaseHelper.getContact(itemAtPosition.getNumber());
 
-                        if (contact.get_phoneNumber() == null) {
+                            if (contact.get_phoneNumber() == null) {
 
-                            dataBaseHelper.addContact(new Contact(itemAtPosition.getNumber(), itemAtPosition.getName()));
-                        }
-
-
-                        final HashMap<String, Boolean> hashMap = new HashMap<String, Boolean>(); // Where we track the selected items
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
-                        String[] toppings = {"Call", "Message", "Both"};
-                        builder.setTitle(String.format("%s\n%s ( %s )", "Block ", (itemAtPosition.getName() != null) ? itemAtPosition.getName() : "", itemAtPosition.getNumber()))
-
-                                .setMultiChoiceItems(toppings, null,
-                                        new DialogInterface.OnMultiChoiceClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which,
-                                                                boolean isChecked) {
+                                dataBaseHelper.addContact(new Contact(itemAtPosition.getNumber(), itemAtPosition.getName()));
+                            }
 
 
-                                                switch (which) {
+                            final HashMap<String, Boolean> hashMap = new HashMap<String, Boolean>(); // Where we track the selected items
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-                                                    case 0:
+                            String[] toppings = {"Call", "Message", "Both"};
+                            builder.setTitle(String.format("%s\n%s ( %s )", "Block ", (itemAtPosition.getName() != null) ? itemAtPosition.getName() : "", itemAtPosition.getNumber()))
 
-                                                        if (isChecked) {
+                                    .setMultiChoiceItems(toppings, null,
+                                            new DialogInterface.OnMultiChoiceClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which,
+                                                                    boolean isChecked) {
 
-                                                            hashMap.put("Call", true);
-                                                        }
 
-                                                        break;
-                                                    case 1:
-                                                        if (isChecked) {
-                                                            hashMap.put("Msg", true);
-                                                        }
-                                                        break;
-                                                    case 2:
+                                                    switch (which) {
 
-                                                        if (isChecked) {
-                                                            hashMap.put("Both", true);
-                                                        }
-                                                        break;
+                                                        case 0:
+
+                                                            if (isChecked) {
+
+                                                                hashMap.put("Call", true);
+                                                            }
+
+                                                            break;
+                                                        case 1:
+                                                            if (isChecked) {
+                                                                hashMap.put("Msg", true);
+                                                            }
+                                                            break;
+                                                        case 2:
+
+                                                            if (isChecked) {
+                                                                hashMap.put("Both", true);
+                                                            }
+                                                            break;
+                                                    }
+
+
                                                 }
+                                            })
+                                            // Set the action buttons
+                                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int id) {
 
+
+                                            Boolean both = hashMap.get("Both") != null ? hashMap.get("Both") : false;
+                                            Boolean call = hashMap.get("Call") != null ? hashMap.get("Call") : false;
+                                            Boolean msg = hashMap.get("Msg") != null ? hashMap.get("Msg") : false;
+
+                                            if (both) {
+
+                                                dataBaseHelper.updateContact(new Contact(itemAtPosition.getNumber(),
+                                                        itemAtPosition.getName(), true, true, itemAtPosition.getPhoto()));
+
+                                            } else {
+                                                dataBaseHelper.updateContact(new Contact(itemAtPosition.getNumber(),
+                                                        itemAtPosition.getName(), call, msg, itemAtPosition.getPhoto()));
 
                                             }
-                                        })
-                                        // Set the action buttons
-                                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int id) {
+                                        }
+                                    })
+                                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int id) {
 
-
-                                        Boolean both = hashMap.get("Both") != null ? hashMap.get("Both") : false;
-                                        Boolean call = hashMap.get("Call") != null ? hashMap.get("Call") : false;
-                                        Boolean msg = hashMap.get("Msg") != null ? hashMap.get("Msg") : false;
-
-                                        if (both) {
-
-                                            dataBaseHelper.updateContact(new Contact(itemAtPosition.getNumber(),
-                                                    itemAtPosition.getName(), true, true, itemAtPosition.getPhoto()));
-
-                                        } else {
-                                            dataBaseHelper.updateContact(new Contact(itemAtPosition.getNumber(),
-                                                    itemAtPosition.getName(), call, msg, itemAtPosition.getPhoto()));
 
                                         }
-                                    }
-                                })
-                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int id) {
+                                    });
+                            builder.show();
 
 
-                                    }
-                                });
-                        builder.show();
-
-
-                        //
-                    }
-                });
+                            //
+                        }
+                    });
 
                 }
                 listView.setAdapter(adapter);

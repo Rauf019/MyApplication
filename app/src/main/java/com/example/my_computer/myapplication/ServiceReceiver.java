@@ -28,7 +28,7 @@ import java.lang.reflect.Method;
 
 public class ServiceReceiver extends BroadcastReceiver {
 
-    static int num, Mode = -1;
+    static int num;
     Context context;
     TelephonyManager telephony;
     DataBaseHelper dataBaseHelper;
@@ -39,11 +39,14 @@ public class ServiceReceiver extends BroadcastReceiver {
     String temple;
     String duration;
 
+
     public void onReceive(Context context, Intent intent) {
 
         this.intent = intent;
         this.context = context;
         dataBaseHelper = new DataBaseHelper(context);
+        String action = intent.getAction();
+
 
         telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         shared(context);
@@ -51,40 +54,40 @@ public class ServiceReceiver extends BroadcastReceiver {
         int key_name = pref.getInt("key_name", 3);
         switch (key_name) {
 
-            case 0:
-                // accept all
+            case 0:      // accept all
 
 
                 break;
 
-            case 1:
-                // block all
+            case 1:        // block all
+
 
                 try {
                     all_Call();
                     all_Sms();
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
                 break;
 
-            case 2:
-                // allow only contact
+            case 2:     // allow only contact
 
 
                 try {
-                    Mode = 0;
-                    PhoneStateListeners listener1 = new PhoneStateListeners();
+
+                    Contact_StateListeners listener1 = new Contact_StateListeners();
                     telephony.listen(listener1, PhoneStateListener.LISTEN_CALL_STATE);
-                    telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
+                    //           telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
                 break;
-            case 3:
-                // black list
+            case 3:          // black list
+
 
                 try {
 
@@ -93,10 +96,11 @@ public class ServiceReceiver extends BroadcastReceiver {
                     if (intent.getAction() == "android.provider.Telephony.SMS_RECEIVED") {
                         Sms_Filter();
                     }
-                    Mode = 1;
-                    PhoneStateListeners listener1 = new PhoneStateListeners();
+
+
+                    Call_Filter_StateListeners listener1 = new Call_Filter_StateListeners();
                     telephony.listen(listener1, PhoneStateListener.LISTEN_CALL_STATE);
-                    telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
+                    //         telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -109,12 +113,12 @@ public class ServiceReceiver extends BroadcastReceiver {
 
                 try {
 
-                    Mode = 2;
+
                     all_Call();
-                    all_Sms();
-                    PhoneStateListeners listener1 = new PhoneStateListeners();
+                    all_Sms_with_reply();
+                    Do_not_Dis_StateListeners listener1 = new Do_not_Dis_StateListeners();
                     telephony.listen(listener1, PhoneStateListener.LISTEN_CALL_STATE);
-                    telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
+                    //   telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -124,7 +128,6 @@ public class ServiceReceiver extends BroadcastReceiver {
             default:
                 break;
         }
-
 
     }
 
@@ -226,17 +229,62 @@ public class ServiceReceiver extends BroadcastReceiver {
 
 
         try {
-
             if (intent.getAction() == "android.provider.Telephony.SMS_RECEIVED") {
 
-                abortBroadcast();
+                final Bundle bundle = intent.getExtras();
+
+                if (bundle != null) {
+
+                    final Object[] pdusObj = (Object[]) bundle.get("pdus");
+
+                    for (int i = 0; i < pdusObj.length; i++) {
+                        SmsMessage currentMessage = SmsMessage.createFromPdu((byte[]) pdusObj[i]);
+                        String phoneNumber = currentMessage.getDisplayOriginatingAddress();
+
+                        if (notification) {
+                            notification("Call Blocker", "Call Block " + phoneNumber);
+                        }
+
+                        abortBroadcast();
+                    }
+
+
+                }
             }
-
-
         } catch (Exception e) {
             Toast.makeText(context, "Unable to Delete Sms ", Toast.LENGTH_SHORT).show();
 
         }
+    }
+
+    public void all_Sms_with_reply() {
+
+
+        try {
+            final Bundle bundle = intent.getExtras();
+
+            if (intent.getAction() == "android.provider.Telephony.SMS_RECEIVED") {
+
+                if (bundle != null) {
+
+                    final Object[] pdusObj = (Object[]) bundle.get("pdus");
+
+                    for (int i = 0; i < pdusObj.length; i++) {
+
+                        SmsMessage currentMessage = SmsMessage.createFromPdu((byte[]) pdusObj[i]);
+                        String phoneNumber = currentMessage.getDisplayOriginatingAddress();
+//                        send_sms(phoneNumber, temple, duration);
+                        abortBroadcast();
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        abortBroadcast();
     }
 
     public void notification(String Not_Title, String text) {
@@ -291,6 +339,8 @@ public class ServiceReceiver extends BroadcastReceiver {
         Object telephonyObject;
         Object serviceManagerObject;
         try {
+
+
             telephonyClass = Class.forName(telephonyName);
             telephonyStubClass = telephonyClass.getClasses()[0];
             serviceManagerClass = Class.forName(serviceManagerName);
@@ -317,55 +367,66 @@ public class ServiceReceiver extends BroadcastReceiver {
 
     }
 
-    class PhoneStateListeners extends PhoneStateListener {
+    public void send_sms(String incomingNumber, String temple, String duration) {
+        try {
+
+            SmsManager sms = SmsManager.getDefault();
+            sms.sendTextMessage("03463113142", null, temple + "" + duration, null, null);
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+    }
+
+    class Contact_StateListeners extends PhoneStateListener {
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
 
+            super.onCallStateChanged(state, incomingNumber);
+            if (state == TelephonyManager.CALL_STATE_RINGING) {
+
+
+                try {
+                    if (!((get_lookup(context, incomingNumber)))) {
+
+                        all_Call();
+                        all_Sms();
+
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
+            }
+        }
+
+    }
+
+    class Call_Filter_StateListeners extends PhoneStateListener {
+        @Override
+        public void onCallStateChanged(int state, String incomingNumber) {
+            super.onCallStateChanged(state, incomingNumber);
 
             if (state == TelephonyManager.CALL_STATE_RINGING) {
 
-                if (Integer.parseInt(incomingNumber) > 0) {
+
+                Call_Filter(incomingNumber);
 
 
-                    switch (Mode) {
-
-                        case 0:
-                            try {
-                                if (!((get_lookup(context, incomingNumber)))) {
-
-                                    all_Call();
-                                    all_Sms();
-
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-
-
-                            break;
-                        case 1:
-                            Call_Filter(incomingNumber);
-                            break;
-                        case 2:
-                            try {
-                                SmsManager smsManager = SmsManager.getDefault();
-                                smsManager.sendTextMessage(incomingNumber, null, temple + " " + duration, null, null);
-
-                            } catch (Exception e) {
-
-                                e.printStackTrace();
-                            }
-                            break;
-                    }
-                } else if (p_calls) {
-                    all_Sms();
-                    all_Call();
-                    ;
-
-                }
             }
 
         }
     }
-}
 
+    class Do_not_Dis_StateListeners extends PhoneStateListener {
+        @Override
+        public void onCallStateChanged(int state, String incomingNumber) {
+            super.onCallStateChanged(state, incomingNumber);
+            send_sms(incomingNumber, temple, duration);
+
+        }
+
+    }
+}

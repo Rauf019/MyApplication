@@ -138,15 +138,10 @@ public class FullscreenActivity extends Activity {
         protected Custum_Class doInBackground(Void... urls) {
             try {
 
-
                 ContentResolver cr = getApplicationContext().getContentResolver();
-
-
                 Cursor cursor = cr.query(Uri.parse("content://sms/"), new String[]{"address"}, null, null, null);
-
                 Cursor cursor1 = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null,
                         ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
-
                 Cursor cursor2 = cr.query(CallLog.Calls.CONTENT_URI, new String[]{"number", "name"}
                         , null, null, null);
 
