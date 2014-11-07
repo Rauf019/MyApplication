@@ -8,6 +8,8 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
+import com.flurry.android.FlurryAgent;
+
 
 public class SettingsActivity extends PreferenceActivity {
 
@@ -76,6 +78,22 @@ public class SettingsActivity extends PreferenceActivity {
         preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
 
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FlurryAgent.onStartSession(this, getString(R.string.FlurryAgent));
+        FlurryAgent.logEvent("In Setting");
+        FlurryAgent.setLogEnabled(true);
+        FlurryAgent.setLogEvents(true);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        FlurryAgent.onEndSession(this);
     }
 
     @Override

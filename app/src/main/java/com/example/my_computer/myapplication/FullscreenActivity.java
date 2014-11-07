@@ -13,6 +13,7 @@ import android.provider.CallLog;
 import android.provider.ContactsContract;
 import android.widget.ProgressBar;
 
+import com.flurry.android.FlurryAgent;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 
@@ -33,28 +34,24 @@ public class FullscreenActivity extends Activity {
     protected void onPause() {
         super.onPause();
 
-
-//        execute.cancel(true);
-//        finish();
-
-
     }
 
-    //    @Override
-//    protected void onStart()
-//    {
-//        super.onStart();
-//        FlurryAgent.onStartSession(this, getString(R.string.FlurryAgent));
-//        FlurryAgent.setUserId("Full Activity");
-//        FlurryAgent.setLogEnabled(true);
-//        FlurryAgent.setLogEvents(true);
-//    }
-//    @Override
-//    protected void onStop()
-//    {
-//        super.onStop();
-//        FlurryAgent.onEndSession(this);
-//    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FlurryAgent.onStartSession(this, getString(R.string.FlurryAgent));
+        FlurryAgent.logEvent("In Splash Screen");
+        FlurryAgent.setLogEnabled(true);
+        FlurryAgent.setLogEvents(true);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        FlurryAgent.onEndSession(this);
+    }
+
     @Override
     public void onBackPressed() {
         //     super.onBackPressed();
@@ -89,6 +86,8 @@ public class FullscreenActivity extends Activity {
     void startMyTask(AsyncTask asyncTask) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+
+
             asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
 
         else

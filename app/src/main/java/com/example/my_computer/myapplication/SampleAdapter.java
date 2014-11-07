@@ -38,9 +38,8 @@ public class SampleAdapter extends ArrayAdapter<Contact> {
         mBackgroundColors.add(R.color.orange);
         mBackgroundColors.add(R.color.blue);
         mBackgroundColors.add(R.color.grey);
-        mBackgroundColors.add(R.color.red_light);
+
         mBackgroundColors.add(R.color.blue_light);
-        mBackgroundColors.add(R.color.green);
 
 
     }
@@ -61,7 +60,7 @@ public class SampleAdapter extends ArrayAdapter<Contact> {
             if (convertView == null) {
                 convertView = mLayoutInflater.inflate(R.layout.list_item_sample, parent, false);
                 vh = new ViewHolder();
-//                vh.txtLineOne = (DynamicHeightTextView) convertView.findViewById(R.id.txt_line1);
+
                 vh.txtLineOne = (TextView) convertView.findViewById(R.id.txt_line1);
                 vh.contact_img = (ImageView) convertView.findViewById(R.id.contact_image);
                 vh.Del_btn = (ImageView) convertView.findViewById(R.id.del);
@@ -77,7 +76,6 @@ public class SampleAdapter extends ArrayAdapter<Contact> {
 
             convertView.setBackgroundResource(mBackgroundColors.get(backgroundIndex));
 
-//            vh.txtLineOne.setHeightRatio(1.52);
 
             final Contact contact = contact1.get(position);
 

@@ -112,15 +112,15 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
     protected void onStart() {
         super.onStart();
         FlurryAgent.onStartSession(this, getString(R.string.FlurryAgent));
-        FlurryAgent.setUserId("My Activity");
+        FlurryAgent.logEvent("In Main Activity");
         FlurryAgent.setLogEnabled(true);
+
         FlurryAgent.setLogEvents(true);
-
     }
-
     @Override
     protected void onStop() {
         super.onStop();
+
         FlurryAgent.onEndSession(this);
     }
 
@@ -610,7 +610,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
                                                 }
                                             })
-                                            // Set the action buttons
+
                                     .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int id) {

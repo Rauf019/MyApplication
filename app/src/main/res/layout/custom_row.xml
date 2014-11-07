@@ -8,28 +8,27 @@
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:layout_gravity="right|top"
-        android:background="#fff"
-        android:tag="front">
+        android:background="#fff">
 
         <com.example.my_computer.myapplication.LetterImageView
             android:id="@+id/iv_avatar"
-            android:layout_width="57dp"
-            android:layout_height="57dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_centerVertical="true"
-            android:layout_margin="4dp" />
+            android:layout_margin="5dp" />
 
         <TextView
             android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="7dp"
+            android:layout_marginLeft="10dp"
             android:layout_toEndOf="@+id/iv_avatar"
             android:layout_toRightOf="@+id/iv_avatar"
-            android:maxLines="3"
+
             android:singleLine="false"
             android:text="Name"
-            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textSize="17sp"
             android:textStyle="normal" />
 
 

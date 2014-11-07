@@ -11,8 +11,8 @@
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="sms_enable"
-        android:summary="In Do Not Disturb mode if you want to respond  sms with sms "
-        android:title="Respond with sms " />
+        android:summary="On Do Not Disturb mode if you want to respond to incoming  sms with sms "
+        android:title="Respond To Incoming  Sms " />
 
 
     <CheckBoxPreference

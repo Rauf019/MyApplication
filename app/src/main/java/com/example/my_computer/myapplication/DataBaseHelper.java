@@ -11,7 +11,7 @@ import java.util.List;
 
 public class DataBaseHelper extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "Call_blocker";
     private static final String TABLE_CONTACTS = "Contacts";
     private static final String PHONE_NUMBER = " PHONE_NUMBER ";
