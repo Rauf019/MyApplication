@@ -40,12 +40,10 @@ public class LetterImageView extends ImageView {
 
         if (Character.isLetter(letter)) {
             mLetter = Character.toUpperCase(letter);
-
         } else {
             mLetter = '#';
 
         }
-
         invalidate();
     }
 

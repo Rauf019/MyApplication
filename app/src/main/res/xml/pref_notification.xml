@@ -4,8 +4,16 @@
     <CheckBoxPreference
         android:defaultValue="false"
         android:key="p_calls"
-        android:summary="Block private numbers "
-        android:title="Private numbers" />
+        android:summary="Block private numbers"
+        android:title="Block Private Numbers" />
+
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="sms_enable"
+        android:summary="In Do Not Disturb mode if you want to respond  sms with sms "
+        android:title="Respond with sms " />
+
 
     <CheckBoxPreference
         android:defaultValue="true"
@@ -14,13 +22,13 @@
         android:title="Notification" />
 
     <PreferenceCategory android:title="Do Not Distrub">
+
         <EditTextPreference
-            android:layout_width="wrap_content"
             android:defaultValue="Hi i am busy right now i will call you after"
             android:inputType="text"
             android:key="temple"
             android:summary="Enter text template"
-            android:title="Text template"
+            android:title="Text Template"
 
             />
         <ListPreference
@@ -29,10 +37,7 @@
             android:entryValues="@array/duration"
             android:key="duration"
             android:summary="Enter time duration "
-            android:title="Duration"
-
-
-            />
+            android:title="Duration" />
     </PreferenceCategory>
 
 

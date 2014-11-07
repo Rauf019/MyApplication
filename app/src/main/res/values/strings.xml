@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Call Blocker</string>
+    <string name="app_name">Call Out</string>
     <string name="title_section1">Black List</string>
     <string name="title_section2">By Contact </string>
     <string name="title_section3">By Message</string>
@@ -111,6 +111,7 @@
 
     <string name="pref_title_ringtone">Ringtone</string>
     <string name="pref_ringtone_silent">Silent</string>
+    <string name="FlurryAgent">YD89P7T8QZ3KSR85329N</string>
 
 
 </resources>

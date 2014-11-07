@@ -11,7 +11,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.etsy.android.grid.util.DynamicHeightTextView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -62,7 +61,8 @@ public class SampleAdapter extends ArrayAdapter<Contact> {
             if (convertView == null) {
                 convertView = mLayoutInflater.inflate(R.layout.list_item_sample, parent, false);
                 vh = new ViewHolder();
-                vh.txtLineOne = (DynamicHeightTextView) convertView.findViewById(R.id.txt_line1);
+//                vh.txtLineOne = (DynamicHeightTextView) convertView.findViewById(R.id.txt_line1);
+                vh.txtLineOne = (TextView) convertView.findViewById(R.id.txt_line1);
                 vh.contact_img = (ImageView) convertView.findViewById(R.id.contact_image);
                 vh.Del_btn = (ImageView) convertView.findViewById(R.id.del);
                 vh.call_icon = (ImageView) convertView.findViewById(R.id.call_icon);
@@ -77,7 +77,7 @@ public class SampleAdapter extends ArrayAdapter<Contact> {
 
             convertView.setBackgroundResource(mBackgroundColors.get(backgroundIndex));
 
-            vh.txtLineOne.setHeightRatio(1.52);
+//            vh.txtLineOne.setHeightRatio(1.52);
 
             final Contact contact = contact1.get(position);
 
@@ -147,8 +147,8 @@ public class SampleAdapter extends ArrayAdapter<Contact> {
     }
 
     static class ViewHolder {
-        DynamicHeightTextView txtLineOne;
-        TextView textView;
+
+        TextView txtLineOne;
         ImageView Del_btn;
         ImageView call_icon;
         ImageView msg_icon;

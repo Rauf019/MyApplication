@@ -4,7 +4,7 @@
     android:layout_height="match_parent">
 
     <RelativeLayout
-        android:id="@+id/front"
+
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:layout_gravity="right|top"
@@ -13,8 +13,8 @@
 
         <com.example.my_computer.myapplication.LetterImageView
             android:id="@+id/iv_avatar"
-            android:layout_width="67dp"
-            android:layout_height="67dp"
+            android:layout_width="57dp"
+            android:layout_height="57dp"
             android:layout_centerVertical="true"
             android:layout_margin="4dp" />
 
@@ -30,7 +30,6 @@
             android:singleLine="false"
             android:text="Name"
             android:textAppearance="?android:attr/textAppearanceSmall"
-
             android:textStyle="normal" />
 
 

@@ -91,30 +91,11 @@ public class SettingsActivity extends PreferenceActivity {
 
         try {
 
-
-//        addPreferencesFromResource(R.xml.pref_general);
-
-//        fakeHeader = new PreferenceCategory(this);
-//        fakeHeader.setTitle("Calls");
-//        getPreferenceScreen().addPreference(fakeHeader);
             addPreferencesFromResource(R.xml.pref_notification);
-//
-//            fakeHeader = new PreferenceCategory(this);
-//            fakeHeader.setTitle("Do not distrub");
-//            getPreferenceScreen().addPreference(fakeHeader);
-//            addPreferencesFromResource(R.xml.do_not);
-//
-//            fakeHeader = new PreferenceCategory(this);
-//            fakeHeader.setTitle("Share with us");
-//            getPreferenceScreen().addPreference(fakeHeader);
-//            addPreferencesFromResource(R.xml.pref_data_sync);
-
-
             bindPreferenceSummaryToValue(findPreference("key"));
             bindPreferenceSummaryToValue(findPreference("key1"));
             bindPreferenceSummaryToValue(findPreference("duration"));
             bindPreferenceSummaryToValue(findPreference("temple"));
-
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -124,80 +105,3 @@ public class SettingsActivity extends PreferenceActivity {
     }
 }
 
-/**
- * {@inheritDoc}
- */
-//    @Override
-//    public boolean onIsMultiPane() {
-//        return isXLargeTablet(this) && !isSimplePreferences(this);
-//    }
-
-/**
- * {@inheritDoc}
- */
-//    @Override
-//    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-//    public void onBuildHeaders(List<Header> target) {
-//        if (!isSimplePreferences(this)) {
-//            loadHeadersFromResource(R.xml.pref_headers, target);
-//        }
-//    }
-
-/**
- * This fragment shows general preferences only. It is used when the
- * activity is showing a two-pane settings UI.
- */
-//    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-//    public static class GeneralPreferenceFragment extends PreferenceFragment {
-//        @Override
-//        public void onCreate(Bundle savedInstanceState) {
-//            super.onCreate(savedInstanceState);
-//            addPreferencesFromResource(R.xml.pref_general);
-//
-//            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-//            // to their values. When their values change, their summaries are
-//            // updated to reflect the new value, per the Android Design
-//            // guidelines.
-//            bindPreferenceSummaryToValue(findPreference("example_text"));
-//            bindPreferenceSummaryToValue(findPreference("example_list"));
-//        }
-//    }
-//
-//    /**
-//     * This fragment shows notification preferences only. It is used when the
-//     * activity is showing a two-pane settings UI.
-//     */
-//    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-//    public static class NotificationPreferenceFragment extends PreferenceFragment {
-//        @Override
-//        public void onCreate(Bundle savedInstanceState) {
-//            super.onCreate(savedInstanceState);
-//            addPreferencesFromResource(R.xml.pref_notification);
-//
-//            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-//            // to their values. When their values change, their summaries are
-//            // updated to reflect the new value, per the Android Design
-//            // guidelines.
-//            bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
-//        }
-//    }
-//
-//    /**
-//     * This fragment shows data and sync preferences only. It is used when the
-//     * activity is showing a two-pane settings UI.
-//     */
-//    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-//
-//    public static class DataSyncPreferenceFragment extends PreferenceFragment {
-//        @Override
-//        public void onCreate(Bundle savedInstanceState) {
-//            super.onCreate(savedInstanceState);
-//            addPreferencesFromResource(R.xml.pref_data_sync);
-//
-//            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-//            // to their values. When their values change, their summaries are
-//            // updated to reflect the new value, per the Android Design
-//            // guidelines.
-//            bindPreferenceSummaryToValue(findPreference("sync_frequency"));
-//        }
-//    }

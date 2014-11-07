@@ -18,7 +18,6 @@ import android.telephony.PhoneStateListener;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
-import android.widget.Toast;
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
@@ -34,39 +33,53 @@ public class ServiceReceiver extends BroadcastReceiver {
     DataBaseHelper dataBaseHelper;
     SharedPreferences pref;
     Intent intent;
-    boolean p_calls;
     boolean notification;
     String temple;
     String duration;
+    Custum_StateListeners custum_stateListeners;
+    private boolean p_calls;
+    private boolean sms_enable;
 
     public void onReceive(Context context, Intent intent) {
 
         this.intent = intent;
         this.context = context;
         dataBaseHelper = new DataBaseHelper(context);
-        String action = intent.getAction();
         telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         shared(context);
         pref = context.getSharedPreferences("MyPref", 0);
-        int key_name = pref.getInt("key_name", 3);
 
 
-        if (!(action.equals("android.intent.action.NEW_OUTGOING_CALL"))) {
+        if (custum_stateListeners == null) {
+            custum_stateListeners = new Custum_StateListeners();
+            telephony.listen(custum_stateListeners, PhoneStateListener.LISTEN_CALL_STATE);
+            telephony.listen(custum_stateListeners, PhoneStateListener.LISTEN_NONE);
+        }
 
+        if (intent.getAction() == "android.provider.Telephony.SMS_RECEIVED") {
+
+            String phonenumber = sms_getnumber(intent);
+            int key_name = pref.getInt("key_name", 0);
 
             switch (key_name) {
 
                 case 0:      // accept all
-
-
                     break;
+
 
                 case 1:        // block all
 
                     try {
 
-                        all_Call();
-                        all_Sms();
+                        final Bundle bundle = intent.getExtras();
+
+                        if (bundle != null) {
+                            if (notification) {
+                                notification("Call Blocker", "Message Block from " + get_Name(context, phonenumber));
+                            }
+                            abortBroadcast();
+                        }
+
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -75,38 +88,33 @@ public class ServiceReceiver extends BroadcastReceiver {
 
                 case 2:     // allow only contact
 
+                    if (phonenumber != null) {
+                        if (!(get_lookup(context, phonenumber))) {
 
-                    try {
-
-
-                        Contact_StateListeners llistener1 = new Contact_StateListeners();
-                        telephony.listen(llistener1, PhoneStateListener.LISTEN_CALL_STATE);
-                        telephony.listen(llistener1, PhoneStateListener.LISTEN_NONE);
-
-
-                        //           telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                            if (notification) {
+                                notification("Call Blocker", "Message Block from " + get_Name(context, phonenumber));
+                            }
+                            abortBroadcast();
+                        }
                     }
 
                     break;
+
                 case 3:          // black list
 
-
                     try {
+                        if (phonenumber != null) {
 
-                        //  android.intent.action.PHONE_STATE
+                            Contact contact = dataBaseHelper.getContact(phonenumber);
 
-                        if (intent.getAction() == "android.provider.Telephony.SMS_RECEIVED") {
-                            Sms_Filter();
+                            if (contact.get_is_Msg_block()) {
+                                if (notification) {
+                                    notification("Call Blocker", "Message Block from " + contact.get_Name());
+                                }
+                                abortBroadcast();
+                            }
+
                         }
-
-
-                        Call_Filter_StateListeners listener1 = new Call_Filter_StateListeners();
-                        telephony.listen(listener1, PhoneStateListener.LISTEN_CALL_STATE);
-                        telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
-
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -115,42 +123,71 @@ public class ServiceReceiver extends BroadcastReceiver {
 
                 case 4:
                     // do not disturb
-
                     try {
 
+                        if (phonenumber != null) {
 
-                        all_Call();
-                        all_Sms_with_reply();
-                        Do_not_Dis_StateListeners listener1 = new Do_not_Dis_StateListeners();
-                        telephony.listen(listener1, PhoneStateListener.LISTEN_CALL_STATE);
-                        telephony.listen(listener1, PhoneStateListener.LISTEN_NONE);
+                            if (sms_enable) {
+                                send_sms(phonenumber, temple, duration);
+                            }
+
+                            if (notification) {
+                                notification("Call Blocker", "Message Block from " + get_Name(context, phonenumber));
+                            }
+
+                            final Bundle bundle = intent.getExtras();
+
+                            if (bundle != null) {
+
+                                abortBroadcast();
+                            }
+
+                        }
 
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                     break;
 
-                default:
-                    break;
             }
         }
+
+    }
+
+    public String sms_getnumber(Intent intent) {
+
+        try {
+
+            final Bundle bundle = intent.getExtras();
+
+            if (bundle != null) {
+
+                final Object[] pdusObj = (Object[]) bundle.get("pdus");
+
+                for (int i = 0; i < pdusObj.length; i++) {
+                    SmsMessage currentMessage = SmsMessage.createFromPdu((byte[]) pdusObj[i]);
+                    String phoneNumber = remove_plus(currentMessage.getDisplayOriginatingAddress());
+                    return phoneNumber;
+
+
+                }
+
+
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public void shared(Context context) {
 
-//        SharedPreferences.Editor editor =  PreferenceManager.getDefaultSharedPreferences(context).edit();
-//        editor.putInt(getString(R.string.saved_high_score), newHighScore);
-//        editor.commit();
-
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-
+        sms_enable = sharedPreferences.getBoolean("sms_enable", true);
         p_calls = sharedPreferences.getBoolean("p_calls", false);
-
-
-        notification = sharedPreferences.getBoolean("notification", false);
-
+        notification = sharedPreferences.getBoolean("notification", true);
         temple = sharedPreferences.getString("temple", "");
-
         duration = sharedPreferences.getString("duration", "");
     }
 
@@ -165,6 +202,9 @@ public class ServiceReceiver extends BroadcastReceiver {
             if (c.moveToFirst()) {
 
                 return true;
+            } else {
+                return false;
+
             }
 
         } catch (Exception e) {
@@ -172,38 +212,29 @@ public class ServiceReceiver extends BroadcastReceiver {
         }
 
 
-        return false;
     }
 
-    public void Sms_Filter() {
+    private String get_Name(Context context, String Number) {
 
-
-        final Bundle bundle = intent.getExtras();
+        Uri lookupUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(Number));
+        Cursor c = context.getContentResolver().query(lookupUri, new String[]{ContactsContract.Data.DISPLAY_NAME,}, null, null, null);
 
         try {
 
-            if (bundle != null) {
 
-                final Object[] pdusObj = (Object[]) bundle.get("pdus");
+            if (c.moveToFirst()) {
 
-                for (int i = 0; i < pdusObj.length; i++) {
+                return c.getString(0);
+            } else {
+                return Number;
 
-                    SmsMessage currentMessage = SmsMessage.createFromPdu((byte[]) pdusObj[i]);
-                    String phoneNumber = currentMessage.getDisplayOriginatingAddress();
-                    Contact contact = dataBaseHelper.getContact(remove_plus(phoneNumber));
-
-                    if (contact.get_is_Msg_block()) {
-                        if (notification) {
-                            notification("Call Blocker", "Message Block " + contact.get_Name());
-                        }
-                        abortBroadcast();
-                    }
-                }
             }
-        } catch (Exception e) {
-            Toast.makeText(context, "Unable to Delete Sms ", Toast.LENGTH_SHORT).show();
 
+        } catch (Exception e) {
+            return Number;
         }
+
+
     }
 
     public String remove_plus(String phoneNumber) {
@@ -230,72 +261,10 @@ public class ServiceReceiver extends BroadcastReceiver {
 
     }
 
-    public void all_Sms() {
-
-
-        try {
-            if (intent.getAction() == "android.provider.Telephony.SMS_RECEIVED") {
-
-                final Bundle bundle = intent.getExtras();
-
-                if (bundle != null) {
-
-                    final Object[] pdusObj = (Object[]) bundle.get("pdus");
-
-                    for (int i = 0; i < pdusObj.length; i++) {
-                        SmsMessage currentMessage = SmsMessage.createFromPdu((byte[]) pdusObj[i]);
-                        String phoneNumber = currentMessage.getDisplayOriginatingAddress();
-
-                        if (notification) {
-                            notification("Call Blocker", "Call Block " + phoneNumber);
-                        }
-
-                        abortBroadcast();
-                    }
-
-
-                }
-            }
-        } catch (Exception e) {
-            Toast.makeText(context, "Unable to Delete Sms ", Toast.LENGTH_SHORT).show();
-
-        }
-    }
-
-    public void all_Sms_with_reply() {
-
-
-        try {
-            final Bundle bundle = intent.getExtras();
-
-            if (intent.getAction() == "android.provider.Telephony.SMS_RECEIVED") {
-
-                if (bundle != null) {
-
-                    final Object[] pdusObj = (Object[]) bundle.get("pdus");
-
-                    for (int i = 0; i < pdusObj.length; i++) {
-
-                        SmsMessage currentMessage = SmsMessage.createFromPdu((byte[]) pdusObj[i]);
-                        String phoneNumber = currentMessage.getDisplayOriginatingAddress();
-//                        send_sms(phoneNumber, temple, duration);
-                        abortBroadcast();
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-        }
-
-        abortBroadcast();
-    }
-
     public void notification(String Not_Title, String text) {
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
-                context).setSmallIcon(R.drawable.icon)
+                context).setSmallIcon(R.drawable.ic_launcher)
                 .setContentTitle(Not_Title).setContentText(text)
                 .setAutoCancel(true);
         Intent intent = new Intent(context, MyActivity.class);
@@ -305,29 +274,6 @@ public class ServiceReceiver extends BroadcastReceiver {
                 .getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.notify(num, mBuilder.build());
         num++;
-    }
-
-    public void Call_Filter(String incomingNumber) {
-
-
-        try {
-            Contact contact = dataBaseHelper.getContact(incomingNumber);
-
-            if (contact.get_is_Call_block()) {
-
-                if (notification) {
-                    notification("Call Blocker", "Call Block " + contact.get_Name());
-                }
-
-                all_Call();
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(context, "Unable to Block Call", Toast.LENGTH_SHORT).show();
-
-
-        }
     }
 
     public void all_Call() {
@@ -344,8 +290,6 @@ public class ServiceReceiver extends BroadcastReceiver {
         Object telephonyObject;
         Object serviceManagerObject;
         try {
-
-
             telephonyClass = Class.forName(telephonyName);
             telephonyStubClass = telephonyClass.getClasses()[0];
             serviceManagerClass = Class.forName(serviceManagerName);
@@ -368,70 +312,115 @@ public class ServiceReceiver extends BroadcastReceiver {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
 
     public void send_sms(String incomingNumber, String temple, String duration) {
         try {
-
             SmsManager sms = SmsManager.getDefault();
-            sms.sendTextMessage("03463113142", null, temple + "" + duration, null, null);
-
+            sms.sendTextMessage(incomingNumber, null, temple + " " + duration, null, null);
         } catch (Exception e) {
 
             e.printStackTrace();
         }
     }
 
-    class Contact_StateListeners extends PhoneStateListener {
+    private class Custum_StateListeners extends PhoneStateListener {
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
 
             super.onCallStateChanged(state, incomingNumber);
+
+
             if (state == TelephonyManager.CALL_STATE_RINGING) {
 
 
-                try {
-                    if (!((get_lookup(context, incomingNumber)))) {
+                if (Integer.parseInt(incomingNumber) < 0 && p_calls) {
+                    all_Call();
+                } else {
 
-                        all_Call();
-                        all_Sms();
+
+                    int key_name = pref.getInt("key_name", 0);
+                    switch (key_name) {
+
+                        case 0:      // accept all
+
+
+                            break;
+
+                        case 1:        // block all
+
+                            try {
+                                if (notification) {
+                                    notification(context.getString(R.string.app_name), "Call Block " + get_Name(context, incomingNumber));
+                                }
+                                all_Call();
+
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                            break;
+
+                        case 2:     // allow only contact
+                            try {
+                                boolean lookup = get_lookup(context, incomingNumber);
+                                if (lookup == false) {
+
+                                    if (notification) {
+                                        notification(context.getString(R.string.app_name), "Call Block " + get_Name(context, incomingNumber));
+                                    }
+                                    all_Call();
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                            break;
+
+                        case 3:          // black list
+
+                            try {
+
+
+                                Contact contact = dataBaseHelper.getContact(incomingNumber);
+
+                                if (contact.get_is_Call_block()) {
+
+                                    if (notification) {
+                                        notification(context.getString(R.string.app_name), "Call Block " + get_Name(context, incomingNumber));
+                                    }
+
+                                    all_Call();
+
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                            break;
+
+                        case 4:
+                            // do not disturb
+                            try {
+
+
+                                send_sms(incomingNumber, temple, duration);
+                                if (notification) {
+                                    notification(context.getString(R.string.app_name), "Call Block " + get_Name(context, incomingNumber));
+                                }
+                                all_Call();
+
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            break;
 
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
-
-
             }
         }
-
     }
 
-    class Call_Filter_StateListeners extends PhoneStateListener {
-        @Override
-        public void onCallStateChanged(int state, String incomingNumber) {
-            super.onCallStateChanged(state, incomingNumber);
-
-            if (state == TelephonyManager.CALL_STATE_RINGING) {
-
-
-                Call_Filter(incomingNumber);
-
-
-            }
-
-        }
-    }
-
-    class Do_not_Dis_StateListeners extends PhoneStateListener {
-        @Override
-        public void onCallStateChanged(int state, String incomingNumber) {
-            super.onCallStateChanged(state, incomingNumber);
-            send_sms(incomingNumber, temple, duration);
-
-        }
-
-    }
 }

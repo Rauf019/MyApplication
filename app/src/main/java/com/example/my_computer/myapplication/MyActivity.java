@@ -24,11 +24,12 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.etsy.android.grid.StaggeredGridView;
+import com.flurry.android.FlurryAgent;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -39,7 +40,6 @@ import java.util.Locale;
 
 public class MyActivity extends ActionBarActivity implements ActionBar.TabListener {
 
-
     public static FullscreenActivity.Custum_Class Loc_custum_class;
     SectionsPagerAdapter mSectionsPagerAdapter;
     ViewPager mViewPager;
@@ -49,16 +49,15 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
         Loc_custum_class = FullscreenActivity.custum_class;
 
-//        if (Loc_custum_class == null) {
-//
-//            Intent intent = new Intent(this, FullscreenActivity.class);
-//            startActivity(intent);
-//            finish();
-//
-//        } else if (Loc_custum_class.is_intialize) {
+        if (Loc_custum_class == null) {
+
+            Intent intent = new Intent(this, FullscreenActivity.class);
+            startActivity(intent);
+            finish();
+
+        } else if (Loc_custum_class.is_intialize) {
 
 
             setContentView(R.layout.activity_my);
@@ -68,7 +67,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
 
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+            mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
 
             try {
@@ -95,7 +94,6 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                 }
             });
 
-
             for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
 
                 actionBar.addTab(
@@ -108,12 +106,27 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
         }
 
-//    }
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FlurryAgent.onStartSession(this, getString(R.string.FlurryAgent));
+        FlurryAgent.setUserId("My Activity");
+        FlurryAgent.setLogEnabled(true);
+        FlurryAgent.setLogEvents(true);
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FlurryAgent.onEndSession(this);
+    }
 
     @Override
     public void onBackPressed() {
-        //   super.onBackPressed();
+        //  super.onBackPressed();
 
         if (doubleBackToExitPressedOnce) {
             super.onBackPressed();
@@ -153,7 +166,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
         if (id == R.id.action_settings) {
 
 
-            int key_name = pref.getInt("key_name", 3);
+            int key_name = pref.getInt("key_name", 0);
 
             builder.setTitle("Block Mode").setSingleChoiceItems(getResources().getStringArray(R.array.blockmode),
                     key_name, new DialogInterface.OnClickListener() {
@@ -649,9 +662,8 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
         private static final String ARG_SECTION_NUMBER = "section_number";
         DataBaseHelper dataBaseHelper;
-        private StaggeredGridView mGridView;
-        private SampleAdapter mAdapter;
 
+        private SampleAdapter mAdapter;
 
         public static StaggeredGridFragment newInstance(int sectionNumber) {
             StaggeredGridFragment fragment = new StaggeredGridFragment();
@@ -667,20 +679,16 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
             setRetainInstance(true);
             dataBaseHelper = new DataBaseHelper(getActivity());
 
-
         }
 
 
         @Override
         public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
-
             View inflate = inflater.inflate(R.layout.activity_sgv, container, false);
-
-            mGridView = (StaggeredGridView) inflate.findViewById(R.id.grid_view);
-
+            GridView gridView = (GridView) inflate.findViewById(R.id.grid_view);
             mAdapter = new SampleAdapter(getActivity(), dataBaseHelper.getAllContacts_true());
 
-            mGridView.setAdapter(mAdapter);
+            gridView.setAdapter(mAdapter);
 
 
             return inflate;

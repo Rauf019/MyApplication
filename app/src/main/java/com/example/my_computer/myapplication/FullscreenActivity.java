@@ -25,20 +25,43 @@ import java.util.List;
 public class FullscreenActivity extends Activity {
 
     public static Custum_Class custum_class;
+    static boolean is_started = true;
     AsyncTask<Void, Integer, Custum_Class> execute;
+
 
     @Override
     protected void onPause() {
         super.onPause();
-        execute.cancel(true);
-        finish();
+
+
+//        execute.cancel(true);
+//        finish();
+
+
     }
 
+    //    @Override
+//    protected void onStart()
+//    {
+//        super.onStart();
+//        FlurryAgent.onStartSession(this, getString(R.string.FlurryAgent));
+//        FlurryAgent.setUserId("Full Activity");
+//        FlurryAgent.setLogEnabled(true);
+//        FlurryAgent.setLogEvents(true);
+//    }
+//    @Override
+//    protected void onStop()
+//    {
+//        super.onStop();
+//        FlurryAgent.onEndSession(this);
+//    }
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        execute.cancel(true);
-        finish();
+        //     super.onBackPressed();
+        //  execute.cancel(true);
+        moveTaskToBack(true);
+
+        //   finish();
 
     }
 
@@ -46,14 +69,22 @@ public class FullscreenActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_fullscreen);
-
-        execute = new Task();
-        startMyTask(execute);
+        if (is_started) {
+            setContentView(R.layout.activity_fullscreen);
+            execute = new Task();
+            startMyTask(execute);
+            is_started = false;
+        }
 
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+
+    }
 
     void startMyTask(AsyncTask asyncTask) {
 
@@ -65,7 +96,6 @@ public class FullscreenActivity extends Activity {
             asyncTask.execute();
     }
 
-
     private HashMap<String, String> get_lookup(Context context, String Number) {
 
         HashMap<String, String> Lookup_list = new HashMap<String, String>();
@@ -74,7 +104,7 @@ public class FullscreenActivity extends Activity {
         try {
             if (c.moveToFirst()) {
 
-                if (c.getString(0) != null && !(c.getString(0).isEmpty())) {
+                if (c.getString(0) != null) {
 
                     Lookup_list.put("Name", c.getString(0));
                     Lookup_list.put("Photo_url", c.getString(1));
@@ -118,12 +148,10 @@ public class FullscreenActivity extends Activity {
 
     class Task extends AsyncTask<Void, Integer, Custum_Class> {
 
-        int Total_count, dec_count;
         LinkedHashMap<String, Read_contacts> List_Read_sms = null;
         List<Read_contacts> List_Read_contacts = null;
         LinkedHashMap<String, Read_contacts> List_Read_call_logs = null;
-
-
+        int Total_count, dec_count;
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar1);
 
         @Override
@@ -131,7 +159,6 @@ public class FullscreenActivity extends Activity {
             super.onProgressUpdate(values);
 
             progressBar.setProgress(values[0]);
-
 
         }
 
@@ -145,7 +172,6 @@ public class FullscreenActivity extends Activity {
                 Cursor cursor2 = cr.query(CallLog.Calls.CONTENT_URI, new String[]{"number", "name"}
                         , null, null, null);
 
-
                 Total_count = cursor.getCount() + cursor1.getCount() + cursor2.getCount();
 
                 progressBar.setMax(Total_count);
@@ -156,64 +182,76 @@ public class FullscreenActivity extends Activity {
 
                 cursor2.moveToFirst();
 
-                List_Read_sms = new LinkedHashMap<String, Read_contacts>();
+                try {
+                    List_Read_sms = new LinkedHashMap<String, Read_contacts>();
 
-                do {
+                    do {
 
-                    String Number = remove_plus(cursor.getString(cursor
-                            .getColumnIndex("address")));
+                        String Number = remove_plus(cursor.getString(cursor
+                                .getColumnIndex("address")));
 
-                    HashMap<String, String> lookup = get_lookup(getApplicationContext(), Number);
+                        HashMap<String, String> lookup = get_lookup(getApplicationContext(), Number);
 
-                    List_Read_sms.put(Number, new Read_contacts(lookup.get("Name"),
-                                    Number,
-                                    lookup.get("Photo_url"))
-                    );
+                        List_Read_sms.put(Number, new Read_contacts(lookup.get("Name"),
+                                        Number,
+                                        lookup.get("Photo_url"))
+                        );
 
-                    onProgressUpdate(dec_count++);
+                        onProgressUpdate(dec_count++);
+                    }
+                    while (cursor.moveToNext());
+                    cursor.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                while (cursor.moveToNext());
-                cursor.close();
 
 
-                List_Read_contacts = new ArrayList<Read_contacts>();
+                try {
+                    List_Read_contacts = new ArrayList<Read_contacts>();
 
 
-                do {
-                    String string = cursor1.getString(cursor1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-                    String string1 = cursor1.getString(cursor1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                    String string13 = cursor1.getString(cursor1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_URI));
-                    List_Read_contacts.add(new Read_contacts(string,
-                            string1,
-                            string13));
+                    do {
+                        String string = cursor1.getString(cursor1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                        String string1 = cursor1.getString(cursor1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                        String string13 = cursor1.getString(cursor1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_URI));
+                        List_Read_contacts.add(new Read_contacts(string,
+                                string1,
+                                string13));
 
-                    onProgressUpdate(dec_count++);
+                        onProgressUpdate(dec_count++);
 
 
+                    }
+                    while (cursor1.moveToNext());
+
+                    cursor1.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                while (cursor1.moveToNext());
-
-                cursor1.close();
 
 
-                List_Read_call_logs = new LinkedHashMap<String, Read_contacts>();
+                try {
+                    List_Read_call_logs = new LinkedHashMap<String, Read_contacts>();
 
-                do {
-                    String string = cursor2.getString(cursor2.getColumnIndex(CallLog.Calls.NUMBER));
-                    HashMap<String, String> lookup = get_lookup(getApplicationContext(), string);
+                    do {
+                        String string = cursor2.getString(cursor2.getColumnIndex(CallLog.Calls.NUMBER));
+                        HashMap<String, String> lookup = get_lookup(getApplicationContext(), string);
 
 
-                    List_Read_call_logs.put(string, new Read_contacts(cursor2.getString(cursor2.getColumnIndex(CallLog.Calls.CACHED_NAME)),
-                            string,
+                        List_Read_call_logs.put(string, new Read_contacts(cursor2.getString(cursor2.getColumnIndex(CallLog.Calls.CACHED_NAME)),
+                                string,
 
-                            lookup.get("Photo_url")));
+                                lookup.get("Photo_url")));
 
-                    onProgressUpdate(dec_count++);
+                        onProgressUpdate(dec_count++);
+                    }
+                    while (cursor2.moveToNext());
+
+
+                    cursor2.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                while (cursor2.moveToNext());
-
-
-                cursor2.close();
 
                 return new Custum_Class(new ArrayList<Read_contacts>(List_Read_sms.values())
                         , new ArrayList<Read_contacts>(List_Read_call_logs.values())
@@ -222,7 +260,9 @@ public class FullscreenActivity extends Activity {
             } catch (Exception e) {
 
 
-                return null;
+                return new Custum_Class(new ArrayList<Read_contacts>()
+                        , new ArrayList<Read_contacts>()
+                        , new ArrayList<Read_contacts>());
 
             }
         }
@@ -239,10 +279,10 @@ public class FullscreenActivity extends Activity {
                         = new Intent(getApplicationContext(), MyActivity.class);
 
                 startActivity(intent);
+                finish();
             }
 
         }
-
 
     }
 

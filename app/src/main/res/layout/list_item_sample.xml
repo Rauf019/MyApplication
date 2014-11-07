@@ -2,34 +2,34 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/panel_content"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:descendantFocusability="blocksDescendants"
-    android:orientation="horizontal">
+    android:layout_height="wrap_content">
 
     <ImageView
         android:id="@+id/call_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_gravity="left|top"
-        android:layout_marginLeft="40dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="41dp"
         android:layout_marginTop="4dp"
-        android:src="@android:drawable/ic_menu_call" />
+        android:src="@drawable/ic_phone_icon" />
 
     <ImageView
         android:id="@+id/msg_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_gravity="left|top"
+        android:layout_marginBottom="4dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="4dp"
-        android:src="@android:drawable/ic_dialog_email" />
+        android:src="@drawable/ic_msg" />
 
     <ImageView
         android:id="@+id/del"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="right|top"
-        android:layout_marginRight="10dp"
+        android:layout_marginRight="4dp"
         android:layout_marginTop="4dp"
         android:src="@android:drawable/ic_menu_delete" />
 
@@ -37,11 +37,12 @@
         android:id="@+id/contact_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
+        android:layout_gravity="center_vertical"
         android:layout_marginBottom="35dp"
-        android:layout_marginTop="28dp" />
+        android:layout_marginTop="35dp"
+        android:gravity="center" />
 
-    <com.etsy.android.grid.util.DynamicHeightTextView
+    <TextView
         android:id="@+id/txt_line1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -49,7 +50,8 @@
         android:layout_marginBottom="5dp"
         android:gravity="center|bottom"
         android:singleLine="false"
-        android:text="Name" />
+        android:text="Name"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </FrameLayout>
 
