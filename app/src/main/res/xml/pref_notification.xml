@@ -1,13 +1,5 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:key="p_calls"
-        android:summary="Block private numbers"
-        android:title="Block Private Numbers" />
-
-
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="sms_enable"
@@ -34,7 +26,7 @@
         <ListPreference
             android:defaultValue="15 minutes"
             android:entries="@array/duration"
-            android:entryValues="@array/duration"
+            android:entryValues="@array/duration_value"
             android:key="duration"
             android:summary="Enter time duration "
             android:title="Duration" />

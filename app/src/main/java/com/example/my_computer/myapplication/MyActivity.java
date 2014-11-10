@@ -59,13 +59,11 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
         } else if (Loc_custum_class.is_intialize) {
 
-
             setContentView(R.layout.activity_my);
-
+//          deleteDatabase("Call_blocker");
             final ActionBar actionBar = getSupportActionBar();
-
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-
+            float density = getResources().getDisplayMetrics().density;
 
             mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
@@ -117,6 +115,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
         FlurryAgent.setLogEvents(true);
     }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -687,10 +686,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
             View inflate = inflater.inflate(R.layout.activity_sgv, container, false);
             GridView gridView = (GridView) inflate.findViewById(R.id.grid_view);
             mAdapter = new SampleAdapter(getActivity(), dataBaseHelper.getAllContacts_true());
-
             gridView.setAdapter(mAdapter);
-
-
             return inflate;
         }
 

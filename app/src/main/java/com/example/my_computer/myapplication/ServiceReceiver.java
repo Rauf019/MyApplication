@@ -75,7 +75,7 @@ public class ServiceReceiver extends BroadcastReceiver {
 
                         if (bundle != null) {
                             if (notification) {
-                                notification("Call Blocker", "Message Block from " + get_Name(context, phonenumber));
+                                notification(context.getPackageName(), "Message Blocked from " + get_Name(context, phonenumber));
                             }
                             abortBroadcast();
                         }
@@ -92,7 +92,7 @@ public class ServiceReceiver extends BroadcastReceiver {
                         if (!(get_lookup(context, phonenumber))) {
 
                             if (notification) {
-                                notification("Call Blocker", "Message Block from " + get_Name(context, phonenumber));
+                                notification(context.getPackageName(), "Message Blocked from " + get_Name(context, phonenumber));
                             }
                             abortBroadcast();
                         }
@@ -109,7 +109,7 @@ public class ServiceReceiver extends BroadcastReceiver {
 
                             if (contact.get_is_Msg_block()) {
                                 if (notification) {
-                                    notification("Call Blocker", "Message Block from " + contact.get_Name());
+                                    notification(context.getPackageName(), "Message Blocked from " + contact.get_Name());
                                 }
                                 abortBroadcast();
                             }
@@ -132,7 +132,7 @@ public class ServiceReceiver extends BroadcastReceiver {
                             }
 
                             if (notification) {
-                                notification("Call Blocker", "Message Block from " + get_Name(context, phonenumber));
+                                notification(context.getPackageName(), "Message Blocked from " + get_Name(context, phonenumber));
                             }
 
                             final Bundle bundle = intent.getExtras();
@@ -184,7 +184,7 @@ public class ServiceReceiver extends BroadcastReceiver {
     public void shared(Context context) {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        sms_enable = sharedPreferences.getBoolean("sms_enable", true);
+//        sms_enable = sharedPreferences.getBoolean("sms_enable", true);
         p_calls = sharedPreferences.getBoolean("p_calls", false);
         notification = sharedPreferences.getBoolean("notification", true);
         temple = sharedPreferences.getString("temple", "");
@@ -333,94 +333,87 @@ public class ServiceReceiver extends BroadcastReceiver {
 
             if (state == TelephonyManager.CALL_STATE_RINGING) {
 
+                int key_name = pref.getInt("key_name", 0);
+                switch (key_name) {
 
-                if (Integer.parseInt(incomingNumber) < 0 && p_calls) {
-                    all_Call();
-                } else {
-
-
-                    int key_name = pref.getInt("key_name", 0);
-                    switch (key_name) {
-
-                        case 0:      // accept all
+                    case 0:      // accept all
 
 
-                            break;
+                        break;
 
-                        case 1:        // block all
+                    case 1:        // block all
 
-                            try {
+                        try {
+                            if (notification) {
+                                notification(context.getPackageName(), "Call Blocked from " + get_Name(context, incomingNumber));
+                            }
+                            all_Call();
+
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        break;
+
+                    case 2:     // allow only contact
+                        try {
+                            boolean lookup = get_lookup(context, incomingNumber);
+                            if (lookup == false) {
+
                                 if (notification) {
-                                    notification(context.getString(R.string.app_name), "Call Block " + get_Name(context, incomingNumber));
+                                    notification(context.getPackageName(), "Call Blocked from " + get_Name(context, incomingNumber));
                                 }
                                 all_Call();
-
-
-                            } catch (Exception e) {
-                                e.printStackTrace();
                             }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
 
-                            break;
+                        break;
 
-                        case 2:     // allow only contact
-                            try {
-                                boolean lookup = get_lookup(context, incomingNumber);
-                                if (lookup == false) {
+                    case 3:          // black list
 
-                                    if (notification) {
-                                        notification(context.getString(R.string.app_name), "Call Block " + get_Name(context, incomingNumber));
-                                    }
-                                    all_Call();
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-
-                            break;
-
-                        case 3:          // black list
-
-                            try {
+                        try {
 
 
-                                Contact contact = dataBaseHelper.getContact(incomingNumber);
+                            Contact contact = dataBaseHelper.getContact(incomingNumber);
 
-                                if (contact.get_is_Call_block()) {
+                            if (contact.get_is_Call_block()) {
 
-                                    if (notification) {
-                                        notification(context.getString(R.string.app_name), "Call Block " + get_Name(context, incomingNumber));
-                                    }
-
-                                    all_Call();
-
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-
-                            break;
-
-                        case 4:
-                            // do not disturb
-                            try {
-
-
-                                send_sms(incomingNumber, temple, duration);
                                 if (notification) {
-                                    notification(context.getString(R.string.app_name), "Call Block " + get_Name(context, incomingNumber));
+                                    notification(context.getPackageName(), "Call Blocked from " + get_Name(context, incomingNumber));
                                 }
+
                                 all_Call();
 
-
-                            } catch (Exception e) {
-                                e.printStackTrace();
                             }
-                            break;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
 
-                    }
+                        break;
+
+                    case 4:
+                        // do not disturb
+                        try {
+
+
+                            send_sms(incomingNumber, temple, duration);
+                            if (notification) {
+                                notification(context.getPackageName(), "Call Blocked from " + get_Name(context, incomingNumber));
+                            }
+                            all_Call();
+
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        break;
+
                 }
             }
         }
     }
-
 }
+

@@ -43,6 +43,7 @@
 
 
     <string-array name="blockmode">
+
         <item>Accepts All calls</item>
         <item>Block All calls </item>
         <item>Allow Only Contacts</item>
@@ -52,6 +53,7 @@
 
 
     <string-array name="duration">
+        <item>None</item>
         <item>15 minutes</item>
         <item>Half an Hour </item>
         <item>One Hour </item>
@@ -59,6 +61,14 @@
         <item>Three Hours</item>
     </string-array>
 
+    <string-array name="duration_value">
+        <item></item>
+        <item>15 minutes</item>
+        <item>Half an Hour </item>
+        <item>One Hour </item>
+        <item>Two Hours</item>
+        <item>Three Hours</item>
+    </string-array>
     <string name="action_contact">Contact</string>
     <string name="action_fastscroll">Fast scroll</string>
     <string name="action_addpadding">Add padding</string>

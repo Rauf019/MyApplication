@@ -10,7 +10,7 @@ import android.widget.ImageView;
 
 import java.util.Random;
 
-//123
+
 public class LetterImageView extends ImageView {
 
     private char mLetter;

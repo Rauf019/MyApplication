@@ -20,7 +20,6 @@ import java.util.Random;
 
 public class SampleAdapter extends ArrayAdapter<Contact> {
 
-
     private final LayoutInflater mLayoutInflater;
     private final Random mRandom;
     private final ArrayList<Integer> mBackgroundColors;
@@ -38,7 +37,6 @@ public class SampleAdapter extends ArrayAdapter<Contact> {
         mBackgroundColors.add(R.color.orange);
         mBackgroundColors.add(R.color.blue);
         mBackgroundColors.add(R.color.grey);
-
         mBackgroundColors.add(R.color.blue_light);
 
 
@@ -62,6 +60,7 @@ public class SampleAdapter extends ArrayAdapter<Contact> {
                 vh = new ViewHolder();
 
                 vh.txtLineOne = (TextView) convertView.findViewById(R.id.txt_line1);
+
                 vh.contact_img = (ImageView) convertView.findViewById(R.id.contact_image);
                 vh.Del_btn = (ImageView) convertView.findViewById(R.id.del);
                 vh.call_icon = (ImageView) convertView.findViewById(R.id.call_icon);
@@ -106,6 +105,7 @@ public class SampleAdapter extends ArrayAdapter<Contact> {
 
             }
             if (contact.get_Name() == null) {
+
 
                 vh.txtLineOne.setText(contact.get_phoneNumber());
 

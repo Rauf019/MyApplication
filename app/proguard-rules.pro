@@ -17,3 +17,5 @@
 #}
 
 -dontwarn com.squareup.picasso.**
+-keep class com.flurry.** { *; }
+-dontwarn com.flurry.**
