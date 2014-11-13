@@ -12,8 +12,7 @@
         android:layout_gravity="left|top"
         android:layout_marginBottom="4dp"
         android:layout_marginLeft="41dp"
-        android:layout_marginTop="4dp"
-        android:src="@drawable/ic_phone_icon" />
+        android:layout_marginTop="4dp" />
 
     <ImageView
         android:id="@+id/msg_icon"
@@ -22,8 +21,7 @@
         android:layout_gravity="left|top"
         android:layout_marginBottom="4dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginTop="4dp"
-        android:src="@drawable/ic_msg" />
+        android:layout_marginTop="4dp" />
 
     <ImageView
         android:id="@+id/del"

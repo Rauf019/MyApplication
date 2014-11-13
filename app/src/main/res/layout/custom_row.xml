@@ -25,12 +25,10 @@
             android:layout_marginLeft="10dp"
             android:layout_toEndOf="@+id/iv_avatar"
             android:layout_toRightOf="@+id/iv_avatar"
-
             android:singleLine="false"
             android:text="Name"
             android:textSize="17sp"
             android:textStyle="normal" />
-
 
     </RelativeLayout>
 

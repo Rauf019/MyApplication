@@ -10,4 +10,5 @@
     </declare-styleable>
 
 
+    <attr name="fontPath" format="string" />
 </resources>

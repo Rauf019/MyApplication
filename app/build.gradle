@@ -1,11 +1,9 @@
 apply plugin: 'com.android.application'
-
-
 android {
     signingConfigs {
     }
     compileSdkVersion 18
-    buildToolsVersion '20'
+    buildToolsVersion '20.0.0'
 
     defaultConfig {
         applicationId 'com.example.my_computer.myapplication'
@@ -25,10 +23,6 @@ android {
     productFlavors {
     }
 }
-repositories {
-//    maven { url 'http://clinker.47deg.com/nexus/content/groups/public' }
-//    mavenCentral()
-}
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
@@ -36,6 +30,4 @@ dependencies {
     compile 'com.android.support:support-v4:20.0.0'
     compile 'com.squareup.picasso:picasso:2.3.4'
     compile files('libs/FlurryAnalytics-4.2.0.jar')
-
-
 }

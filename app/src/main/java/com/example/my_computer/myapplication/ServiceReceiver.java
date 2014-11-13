@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -23,6 +24,9 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 
 import java.lang.reflect.Method;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Locale;
 
 
 public class ServiceReceiver extends BroadcastReceiver {
@@ -37,29 +41,42 @@ public class ServiceReceiver extends BroadcastReceiver {
     String temple;
     String duration;
     Custum_StateListeners custum_stateListeners;
+    AudioManager am;
     private boolean p_calls;
     private boolean sms_enable;
 
     public void onReceive(Context context, Intent intent) {
+        try {
 
         this.intent = intent;
         this.context = context;
         dataBaseHelper = new DataBaseHelper(context);
         telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        shared(context);
+
+            shared(context);
         pref = context.getSharedPreferences("MyPref", 0);
 
 
-        if (custum_stateListeners == null) {
-            custum_stateListeners = new Custum_StateListeners();
-            telephony.listen(custum_stateListeners, PhoneStateListener.LISTEN_CALL_STATE);
-            telephony.listen(custum_stateListeners, PhoneStateListener.LISTEN_NONE);
-        }
+            if (custum_stateListeners == null) {
+
+                custum_stateListeners = new Custum_StateListeners();
+                telephony.listen(custum_stateListeners, PhoneStateListener.LISTEN_CALL_STATE);
+                telephony.listen(custum_stateListeners, PhoneStateListener.LISTEN_NONE);
+
+            }
+
+
 
         if (intent.getAction() == "android.provider.Telephony.SMS_RECEIVED") {
 
-            String phonenumber = sms_getnumber(intent);
-            int key_name = pref.getInt("key_name", 0);
+            String phonenumber = null;
+            int key_name = 0;
+            try {
+                phonenumber = sms_getnumber(intent);
+                key_name = pref.getInt("key_name", 0);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             switch (key_name) {
 
@@ -74,8 +91,9 @@ public class ServiceReceiver extends BroadcastReceiver {
                         final Bundle bundle = intent.getExtras();
 
                         if (bundle != null) {
+
                             if (notification) {
-                                notification(context.getPackageName(), "Message Blocked from " + get_Name(context, phonenumber));
+                                notification("Call Out", "Message Blocked from " + get_Name(context, phonenumber));
                             }
                             abortBroadcast();
                         }
@@ -88,14 +106,18 @@ public class ServiceReceiver extends BroadcastReceiver {
 
                 case 2:     // allow only contact
 
-                    if (phonenumber != null) {
-                        if (!(get_lookup(context, phonenumber))) {
+                    try {
+                        if (phonenumber != null) {
+                            if (!(get_lookup(context, phonenumber))) {
 
-                            if (notification) {
-                                notification(context.getPackageName(), "Message Blocked from " + get_Name(context, phonenumber));
+                                if (notification) {
+                                    notification("Call Out", "Message Blocked from " + get_Name(context, phonenumber));
+                                }
+                                abortBroadcast();
                             }
-                            abortBroadcast();
                         }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
 
                     break;
@@ -108,9 +130,11 @@ public class ServiceReceiver extends BroadcastReceiver {
                             Contact contact = dataBaseHelper.getContact(phonenumber);
 
                             if (contact.get_is_Msg_block()) {
+
                                 if (notification) {
-                                    notification(context.getPackageName(), "Message Blocked from " + contact.get_Name());
+                                    notification("Call Out", "Message Blocked from " + contact.get_Name());
                                 }
+
                                 abortBroadcast();
                             }
 
@@ -132,7 +156,7 @@ public class ServiceReceiver extends BroadcastReceiver {
                             }
 
                             if (notification) {
-                                notification(context.getPackageName(), "Message Blocked from " + get_Name(context, phonenumber));
+                                notification("Call Out", "Message Blocked from " + get_Name(context, phonenumber));
                             }
 
                             final Bundle bundle = intent.getExtras();
@@ -151,7 +175,9 @@ public class ServiceReceiver extends BroadcastReceiver {
 
             }
         }
-
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public String sms_getnumber(Intent intent) {
@@ -166,7 +192,8 @@ public class ServiceReceiver extends BroadcastReceiver {
 
                 for (int i = 0; i < pdusObj.length; i++) {
                     SmsMessage currentMessage = SmsMessage.createFromPdu((byte[]) pdusObj[i]);
-                    String phoneNumber = remove_plus(currentMessage.getDisplayOriginatingAddress());
+                    String phoneNumber = currentMessage.getDisplayOriginatingAddress();
+                    //       remove_plus();
                     return phoneNumber;
 
 
@@ -183,20 +210,26 @@ public class ServiceReceiver extends BroadcastReceiver {
 
     public void shared(Context context) {
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-//        sms_enable = sharedPreferences.getBoolean("sms_enable", true);
-        p_calls = sharedPreferences.getBoolean("p_calls", false);
-        notification = sharedPreferences.getBoolean("notification", true);
-        temple = sharedPreferences.getString("temple", "");
-        duration = sharedPreferences.getString("duration", "");
+        try {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+
+            sms_enable = sharedPreferences.getBoolean("sms_enable", true);
+            p_calls = sharedPreferences.getBoolean("p_calls", false);
+            notification = sharedPreferences.getBoolean("notification", true);
+            temple = sharedPreferences.getString("temple", "");
+            duration = sharedPreferences.getString("duration", "");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean get_lookup(Context context, String Number) {
 
-        Uri lookupUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(Number));
-        Cursor c = context.getContentResolver().query(lookupUri, new String[]{ContactsContract.Data.DISPLAY_NAME,}, null, null, null);
 
         try {
+            Uri lookupUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(Number));
+            Cursor c = context.getContentResolver().query(lookupUri, new String[]{ContactsContract.Data.DISPLAY_NAME,}, null, null, null);
 
 
             if (c.moveToFirst()) {
@@ -216,11 +249,11 @@ public class ServiceReceiver extends BroadcastReceiver {
 
     private String get_Name(Context context, String Number) {
 
-        Uri lookupUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(Number));
-        Cursor c = context.getContentResolver().query(lookupUri, new String[]{ContactsContract.Data.DISPLAY_NAME,}, null, null, null);
 
         try {
 
+            Uri lookupUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(Number));
+            Cursor c = context.getContentResolver().query(lookupUri, new String[]{ContactsContract.Data.DISPLAY_NAME,}, null, null, null);
 
             if (c.moveToFirst()) {
 
@@ -240,6 +273,7 @@ public class ServiceReceiver extends BroadcastReceiver {
     public String remove_plus(String phoneNumber) {
 
         try {
+
             if (phoneNumber.charAt(0) == '+') {
 
                 PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
@@ -247,6 +281,7 @@ public class ServiceReceiver extends BroadcastReceiver {
                 Phonenumber.PhoneNumber numberProto = phoneUtil.parse(phoneNumber, "");
 
                 return "0" + String.valueOf(numberProto.getNationalNumber());
+
 
             } else {
 
@@ -263,17 +298,22 @@ public class ServiceReceiver extends BroadcastReceiver {
 
     public void notification(String Not_Title, String text) {
 
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
-                context).setSmallIcon(R.drawable.ic_launcher)
-                .setContentTitle(Not_Title).setContentText(text)
-                .setAutoCancel(true);
-        Intent intent = new Intent(context, MyActivity.class);
-        PendingIntent pi = PendingIntent.getActivity(context, num, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        mBuilder.setContentIntent(pi);
-        NotificationManager mNotificationManager = (NotificationManager) context
-                .getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotificationManager.notify(num, mBuilder.build());
-        num++;
+        try {
+            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
+                    context).setSmallIcon(R.drawable.ic_launcher)
+                    .setContentTitle(Not_Title)
+                    .setContentText(text)
+                    .setAutoCancel(true);
+            Intent intent = new Intent(context, MyActivity.class);
+            PendingIntent pi = PendingIntent.getActivity(context, num, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            mBuilder.setContentIntent(pi);
+            NotificationManager mNotificationManager = (NotificationManager) context
+                    .getSystemService(Context.NOTIFICATION_SERVICE);
+            mNotificationManager.notify(num, mBuilder.build());
+            num++;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void all_Call() {
@@ -324,96 +364,117 @@ public class ServiceReceiver extends BroadcastReceiver {
         }
     }
 
+    public Long getaLong(String incomingNumber) {
+
+        Long parse1 = null;
+
+        try {
+            NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
+            String s = remove_plus(incomingNumber);
+            parse1 = numberFormat.parse(s).longValue();
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return parse1;
+    }
+
     private class Custum_StateListeners extends PhoneStateListener {
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
-
             super.onCallStateChanged(state, incomingNumber);
-
 
             if (state == TelephonyManager.CALL_STATE_RINGING) {
 
-                int key_name = pref.getInt("key_name", 0);
-                switch (key_name) {
+                Long parse1 = getaLong(incomingNumber);
 
-                    case 0:      // accept all
+                if (p_calls && parse1 < 0) {
 
+                    all_Call();
 
-                        break;
+                } else if (parse1 > 0) {
 
-                    case 1:        // block all
+                    int key_name = pref.getInt("key_name", 0);
+                    switch (key_name) {
 
-                        try {
-                            if (notification) {
-                                notification(context.getPackageName(), "Call Blocked from " + get_Name(context, incomingNumber));
-                            }
-                            all_Call();
+                        case 0:      // accept all
 
+                            break;
 
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        case 1:     // block all
 
-                        break;
-
-                    case 2:     // allow only contact
-                        try {
-                            boolean lookup = get_lookup(context, incomingNumber);
-                            if (lookup == false) {
-
+                            try {
                                 if (notification) {
-                                    notification(context.getPackageName(), "Call Blocked from " + get_Name(context, incomingNumber));
+                                    notification("Call Out", "Call Blocked from " + get_Name(context, incomingNumber));
                                 }
                                 all_Call();
+
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
 
-                        break;
+                            break;
 
-                    case 3:          // black list
+                        case 2:     // allow only contact
+                            try {
+                                boolean lookup = get_lookup(context, incomingNumber);
+                                if (lookup == false) {
 
-                        try {
+                                    if (notification) {
+                                        notification("Call Out", "Call Blocked from " + get_Name(context, incomingNumber));
+                                    }
 
+                                    all_Call();
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
 
-                            Contact contact = dataBaseHelper.getContact(incomingNumber);
+                            break;
 
-                            if (contact.get_is_Call_block()) {
+                        case 3:   // black list
 
+                            try {
+
+                                Contact contact = dataBaseHelper.getContact(incomingNumber);
+
+                                if (contact.get_is_Call_block()) {
+
+                                    if (notification) {
+                                        notification("Call Out", "Call Blocked from " + get_Name(context, incomingNumber));
+                                    }
+
+                                    all_Call();
+
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                            break;
+
+                        case 4:    // do not disturb
+
+                            try {
+                                send_sms(incomingNumber, temple, duration);
                                 if (notification) {
-                                    notification(context.getPackageName(), "Call Blocked from " + get_Name(context, incomingNumber));
+                                    notification("Call Out", "Call Blocked from " + get_Name(context, incomingNumber));
                                 }
 
                                 all_Call();
-
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                            break;
 
-                        break;
-
-                    case 4:
-                        // do not disturb
-                        try {
-
-
-                            send_sms(incomingNumber, temple, duration);
-                            if (notification) {
-                                notification(context.getPackageName(), "Call Blocked from " + get_Name(context, incomingNumber));
-                            }
-                            all_Call();
-
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        break;
-
+                    }
                 }
+
+
             }
         }
     }
+
 }
 

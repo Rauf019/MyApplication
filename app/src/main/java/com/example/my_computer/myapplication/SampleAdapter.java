@@ -2,6 +2,7 @@ package com.example.my_computer.myapplication;
 
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,11 +57,10 @@ public class SampleAdapter extends ArrayAdapter<Contact> {
 
             ViewHolder vh;
             if (convertView == null) {
+
                 convertView = mLayoutInflater.inflate(R.layout.list_item_sample, parent, false);
                 vh = new ViewHolder();
-
                 vh.txtLineOne = (TextView) convertView.findViewById(R.id.txt_line1);
-
                 vh.contact_img = (ImageView) convertView.findViewById(R.id.contact_image);
                 vh.Del_btn = (ImageView) convertView.findViewById(R.id.del);
                 vh.call_icon = (ImageView) convertView.findViewById(R.id.call_icon);
@@ -70,6 +70,13 @@ public class SampleAdapter extends ArrayAdapter<Contact> {
                 vh = (ViewHolder) convertView.getTag();
             }
 
+//            TextView txtLineOne = (TextView) convertView.findViewById(R.id.txt_line1);
+//            ImageView contact_img = (ImageView) convertView.findViewById(R.id.contact_image);
+//            ImageView Del_btn = (ImageView) convertView.findViewById(R.id.del);
+//            ImageView call_icon = (ImageView) convertView.findViewById(R.id.call_icon);
+//            ImageView msg_icon = (ImageView) convertView.findViewById(R.id.msg_icon);
+
+
             int backgroundIndex = position >= mBackgroundColors.size() ?
                     position % mBackgroundColors.size() : position;
 
@@ -78,25 +85,45 @@ public class SampleAdapter extends ArrayAdapter<Contact> {
 
             final Contact contact = contact1.get(position);
 
-            if (contact.get_is_Msg_block() == false) {
+            if (contact.get_is_Msg_block()) {
 
-                vh.msg_icon.setVisibility(ImageView.GONE);
+                Picasso.with(getContext())
+                        .load(R.drawable.ic_msg)
+                        .into(vh.msg_icon);
+                //    call_icon.setVisibility(ImageView.VISIBLE);
+
+            } else {
+
+
+                Picasso.with(getContext())
+                        .load(Color.WHITE)
+                        .into(vh.msg_icon);
+                //         msg_icon.setVisibility(ImageView.INVISIBLE);
 
             }
 
-            if (contact.get_is_Call_block() == false) {
+            if (contact.get_is_Call_block()) {
 
-                vh.call_icon.setVisibility(ImageView.GONE);
+                Picasso.with(getContext())
+                        .load(R.drawable.ic_phone_icon)
+                        .into(vh.call_icon);
+                //        call_icon.setVisibility(ImageView.VISIBLE);
+
+            } else {
+
+                Picasso.with(getContext())
+                        .load(Color.WHITE)
+                        .into(vh.call_icon);
+                //       call_icon.setVisibility(ImageView.INVISIBLE);
 
             }
 
             if (contact.getPhoto() != null) {
 
-
                 Picasso.with(getContext())
                         .load(Uri.parse(contact.getPhoto()))
-
                         .into(vh.contact_img);
+
             } else {
 
                 Picasso.with(getContext())

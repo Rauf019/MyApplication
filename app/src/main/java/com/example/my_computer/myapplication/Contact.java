@@ -61,7 +61,6 @@ public class Contact {
         this._is_Msg_block = _is_Msg_block;
     }
 
-
     public String getPhoto() {
         return photo;
     }

@@ -39,16 +39,24 @@
         <item>#ffbb33</item>
         <item>#cccccc</item>
         <item>#888888</item>
+
     </string-array>
 
 
     <string-array name="blockmode">
-
-        <item>Accepts All calls</item>
-        <item>Block All calls </item>
+        <item>Accepts All Calls and Sms</item>
+        <item>Block All Calls and Sms</item>
         <item>Allow Only Contacts</item>
-        <item>Block Calls From Black List </item>
+        <item>Block Calls and Sms From Black List </item>
         <item>Do not Disturb</item>
+    </string-array>
+
+
+    <string-array name="block_type">
+        <item>Hang Up</item>
+        <item>Mute</item>
+        <item> Vibrate </item>
+
     </string-array>
 
 
@@ -68,6 +76,8 @@
         <item>One Hour </item>
         <item>Two Hours</item>
         <item>Three Hours</item>
+
+
     </string-array>
     <string name="action_contact">Contact</string>
     <string name="action_fastscroll">Fast scroll</string>

@@ -66,6 +66,7 @@ public class FullscreenActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
         if (is_started) {
             setContentView(R.layout.activity_fullscreen);
             execute = new Task();

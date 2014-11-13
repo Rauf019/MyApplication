@@ -1,17 +1,31 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="p_calls"
+        android:summary="Block Private  Calls "
+        android:title="Block Private Numbers " />
+
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="sms_enable"
         android:summary="On Do Not Disturb mode if you want to respond to incoming  sms with sms "
         android:title="Respond To Incoming  Sms " />
 
-
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="notification"
         android:summary="Notification me when call or message blocked"
         android:title="Notification" />
+
+    <!--<ListPreference-->
+    <!--android:defaultValue="15 minutes"-->
+    <!--android:entries="@array/block_type"-->
+    <!--android:entryValues="@array/block_type"-->
+    <!--android:key="block_type"-->
+    <!--android:summary="Enter time duration "-->
+    <!--android:title="" />-->
 
     <PreferenceCategory android:title="Do Not Distrub">
 
@@ -31,8 +45,6 @@
             android:summary="Enter time duration "
             android:title="Duration" />
     </PreferenceCategory>
-
-
     <PreferenceCategory android:title="Share With Us">
         <Preference
             android:key="key"
@@ -45,4 +57,6 @@
             android:summary="Do you like our app?"
             android:title="Submit review"></Preference>
     </PreferenceCategory>
+
+
 </PreferenceScreen>

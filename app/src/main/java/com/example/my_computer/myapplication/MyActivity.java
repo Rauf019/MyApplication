@@ -16,6 +16,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,7 +33,6 @@ import android.widget.Toast;
 import com.flurry.android.FlurryAgent;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -49,61 +49,63 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Loc_custum_class = FullscreenActivity.custum_class;
-
-        if (Loc_custum_class == null) {
-
-            Intent intent = new Intent(this, FullscreenActivity.class);
-            startActivity(intent);
-            finish();
-
-        } else if (Loc_custum_class.is_intialize) {
-
-            setContentView(R.layout.activity_my);
-//          deleteDatabase("Call_blocker");
-            final ActionBar actionBar = getSupportActionBar();
-            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-            float density = getResources().getDisplayMetrics().density;
-
-            mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        try {
 
 
-            try {
-                ViewConfiguration config = ViewConfiguration.get(this);
-                Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
-                if (menuKeyField != null) {
-                    menuKeyField.setAccessible(true);
-                    menuKeyField.setBoolean(config, false);
+            Loc_custum_class = FullscreenActivity.custum_class;
+
+            if (Loc_custum_class == null) {
+
+                Intent intent = new Intent(this, FullscreenActivity.class);
+                startActivity(intent);
+                finish();
+
+            } else if (Loc_custum_class.is_intialize) {
+
+                setContentView(R.layout.activity_my);
+                final ActionBar actionBar = getSupportActionBar();
+                actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+                float density = getResources().getDisplayMetrics().density;
+                Log.d("Screen ", String.valueOf(density));
+                mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+                try {
+                    ViewConfiguration config = ViewConfiguration.get(this);
+                    Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
+                    if (menuKeyField != null) {
+                        menuKeyField.setAccessible(true);
+                        menuKeyField.setBoolean(config, false);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
 
-            mViewPager = (ViewPager) findViewById(R.id.pager);
-            mViewPager.setAdapter(mSectionsPagerAdapter);
+                mViewPager = (ViewPager) findViewById(R.id.pager);
+                mViewPager.setAdapter(mSectionsPagerAdapter);
 
 
-            mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-                @Override
-                public void onPageSelected(int position) {
+                mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+                    @Override
+                    public void onPageSelected(int position) {
 
-                    actionBar.setSelectedNavigationItem(position);
-                    mSectionsPagerAdapter.notifyDataSetChanged();
+                        actionBar.setSelectedNavigationItem(position);
+                        mSectionsPagerAdapter.notifyDataSetChanged();
+                    }
+                });
+
+                for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
+
+                    actionBar.addTab(
+                            actionBar.newTab()
+                                    .setText(mSectionsPagerAdapter.getPageTitle(i))
+                                    .setTabListener(this)
+                    );
                 }
-            });
 
-            for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
 
-                actionBar.addTab(
-                        actionBar.newTab()
-                                .setText(mSectionsPagerAdapter.getPageTitle(i))
-                                .setTabListener(this)
-                );
             }
-
-
+        } catch (Exception a) {
         }
-
     }
 
     @Override
@@ -125,7 +127,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
 
     @Override
     public void onBackPressed() {
-        //  super.onBackPressed();
+
 
         if (doubleBackToExitPressedOnce) {
             super.onBackPressed();
@@ -151,7 +153,6 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
         getMenuInflater().inflate(R.menu.my, menu);
         return true;
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -235,7 +236,7 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
         private static final String ARG_SECTION_NUMBER = "section_number";
         public ListView listView;
         DataBaseHelper dataBaseHelper;
-        ArrayList<Read_contacts> List_Read_contacts;
+
         View rootView;
         Adapter adapter;
 
@@ -248,12 +249,6 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
             return fragment;
         }
 
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            List_Read_contacts = new ArrayList<Read_contacts>();
-
-        }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -403,15 +398,16 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
                                  Bundle savedInstanceState) {
 
             dataBaseHelper = new DataBaseHelper(getActivity());
+
             View rootView = inflater.inflate(R.layout.list, container, false);
             ListView listView = (ListView) rootView.findViewById(R.id.listView);
 
             try {
                 if (Loc_custum_class.getCallLog_list() != null) {
+
                     adapter = new Adapter(getActivity(), Loc_custum_class.getCallLog_list());
-
-
                     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
                         @Override
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
@@ -694,18 +690,27 @@ public class MyActivity extends ActionBarActivity implements ActionBar.TabListen
     }
 
     static class Adapter extends ArrayAdapter<Read_contacts> {
-        private final Activity context;
-        private final List<Read_contacts> names;
+
+
         DataBaseHelper dataBaseHelper;
+        private Activity context = null;
+        private List<Read_contacts> names = null;
 
 
         public Adapter(Activity context, List<Read_contacts> names) {
 
             super(context, android.R.layout.simple_list_item_1, names);
 
-            dataBaseHelper = new DataBaseHelper(getContext());
-            this.context = context;
-            this.names = names;
+            try {
+
+                dataBaseHelper = new DataBaseHelper(getContext());
+                this.context = context;
+                this.names = names;
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
 
         }
