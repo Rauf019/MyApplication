@@ -1,327 +1,37 @@
 package com.example.my_computer.myapplication;
 
 import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.CallLog;
-import android.provider.ContactsContract;
-import android.widget.ProgressBar;
-
-import com.flurry.android.FlurryAgent;
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
-import com.google.i18n.phonenumbers.Phonenumber;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-
+import android.os.Handler;
 
 public class FullscreenActivity extends Activity {
 
-    public static Custum_Class custum_class;
-    static boolean is_started = true;
-    AsyncTask<Void, Integer, Custum_Class> execute;
-
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        FlurryAgent.onStartSession(this, getString(R.string.FlurryAgent));
-        FlurryAgent.logEvent("In Splash Screen");
-        FlurryAgent.setLogEnabled(true);
-        FlurryAgent.setLogEvents(true);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        FlurryAgent.onEndSession(this);
-    }
-
-    @Override
-    public void onBackPressed() {
-        //     super.onBackPressed();
-        //  execute.cancel(true);
-        moveTaskToBack(true);
-
-        //   finish();
-
-    }
+    private static int SPLASH_TIME_OUT = 3000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
-        if (is_started) {
-            setContentView(R.layout.activity_fullscreen);
-            execute = new Task();
-            startMyTask(execute);
-            is_started = false;
-        }
-
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-
-    }
-
-    void startMyTask(AsyncTask asyncTask) {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-
-
-            asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
-
-        else
-
-            asyncTask.execute();
-    }
-
-    private HashMap<String, String> get_lookup(Context context, String Number) {
-
-        HashMap<String, String> Lookup_list = new HashMap<String, String>();
-        Uri lookupUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(Number));
-        Cursor c = context.getContentResolver().query(lookupUri, new String[]{ContactsContract.Data.DISPLAY_NAME, ContactsContract.Data.PHOTO_URI}, null, null, null);
-        try {
-            if (c.moveToFirst()) {
-
-                if (c.getString(0) != null) {
-
-                    Lookup_list.put("Name", c.getString(0));
-                    Lookup_list.put("Photo_url", c.getString(1));
-                    return Lookup_list;
-                }
-
-            }
-
-        } catch (Exception e) {
-
-        } finally {
-            c.close();
-
-        }
-        return Lookup_list;
-    }
-
-    public String remove_plus(String phoneNumber) {
-
-        try {
-            if (phoneNumber.charAt(0) == '+') {
-
-                PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-
-                Phonenumber.PhoneNumber numberProto = phoneUtil.parse(phoneNumber, "");
-
-                return "0" + String.valueOf(numberProto.getNationalNumber());
-
-            } else {
-
-                return phoneNumber;
-            }
-
-        } catch (Exception e) {
-
-
-            return null;
-        }
-
-    }
-
-    class Task extends AsyncTask<Void, Integer, Custum_Class> {
-
-        LinkedHashMap<String, Read_contacts> List_Read_sms = null;
-        List<Read_contacts> List_Read_contacts = null;
-        LinkedHashMap<String, Read_contacts> List_Read_call_logs = null;
-        int Total_count, dec_count;
-        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar1);
-
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
-
-            progressBar.setProgress(values[0]);
-
-        }
-
-        protected Custum_Class doInBackground(Void... urls) {
-            try {
-
-                ContentResolver cr = getApplicationContext().getContentResolver();
-                Cursor cursor = cr.query(Uri.parse("content://sms/"), new String[]{"address"}, null, null, null);
-                Cursor cursor1 = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null,
-                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
-                Cursor cursor2 = cr.query(CallLog.Calls.CONTENT_URI, new String[]{"number", "name"}
-                        , null, null, null);
-
-                Total_count = cursor.getCount() + cursor1.getCount() + cursor2.getCount();
-
-                progressBar.setMax(Total_count);
-
-                cursor.moveToFirst();
-
-                cursor1.moveToFirst();
-
-                cursor2.moveToFirst();
-
-                try {
-                    List_Read_sms = new LinkedHashMap<String, Read_contacts>();
-
-                    do {
-
-                        String Number = remove_plus(cursor.getString(cursor
-                                .getColumnIndex("address")));
-
-                        HashMap<String, String> lookup = get_lookup(getApplicationContext(), Number);
-
-                        List_Read_sms.put(Number, new Read_contacts(lookup.get("Name"),
-                                        Number,
-                                        lookup.get("Photo_url"))
-                        );
-
-                        onProgressUpdate(dec_count++);
-                    }
-                    while (cursor.moveToNext());
-                    cursor.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-
-                try {
-                    List_Read_contacts = new ArrayList<Read_contacts>();
-
-
-                    do {
-                        String string = cursor1.getString(cursor1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-                        String string1 = cursor1.getString(cursor1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                        String string13 = cursor1.getString(cursor1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_URI));
-                        List_Read_contacts.add(new Read_contacts(string,
-                                string1,
-                                string13));
-
-                        onProgressUpdate(dec_count++);
-
-
-                    }
-                    while (cursor1.moveToNext());
-
-                    cursor1.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-
-                try {
-                    List_Read_call_logs = new LinkedHashMap<String, Read_contacts>();
-
-                    do {
-                        String string = cursor2.getString(cursor2.getColumnIndex(CallLog.Calls.NUMBER));
-                        HashMap<String, String> lookup = get_lookup(getApplicationContext(), string);
-
-
-                        List_Read_call_logs.put(string, new Read_contacts(cursor2.getString(cursor2.getColumnIndex(CallLog.Calls.CACHED_NAME)),
-                                string,
-
-                                lookup.get("Photo_url")));
-
-                        onProgressUpdate(dec_count++);
-                    }
-                    while (cursor2.moveToNext());
-
-
-                    cursor2.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                return new Custum_Class(new ArrayList<Read_contacts>(List_Read_sms.values())
-                        , new ArrayList<Read_contacts>(List_Read_call_logs.values())
-                        , List_Read_contacts);
-
-            } catch (Exception e) {
-
-
-                return new Custum_Class(new ArrayList<Read_contacts>()
-                        , new ArrayList<Read_contacts>()
-                        , new ArrayList<Read_contacts>());
-
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Custum_Class aClass) {
-
-            super.onPostExecute(aClass);
-
-            if (aClass != null) {
-                custum_class = aClass;
-                custum_class.is_intialize = true;
-                Intent intent
-                        = new Intent(getApplicationContext(), MyActivity.class);
-
-                startActivity(intent);
+        setContentView(R.layout.splash_screen);
+        new Handler().postDelayed(new Runnable() {
+
+            /*
+             * Showing splash screen with a timer. This will be useful when you
+             * want to show case your app logo / company
+             */
+
+            @Override
+            public void run() {
+
+                Intent i = new Intent(FullscreenActivity.this, MyActivity.class);
+                startActivity(i);
                 finish();
+
+                overridePendingTransition(R.animator.activityfadein,
+                        R.animator.splashfadeout);
             }
-
-        }
-
+        }, SPLASH_TIME_OUT);
     }
-
-    class Custum_Class {
-
-
-        private final List<Read_contacts> sms_list;
-        private final List<Read_contacts> callLog_list;
-        private final List<Read_contacts> contact_list;
-        boolean is_intialize;
-
-
-        public Custum_Class(List<Read_contacts> Sms_list, List<Read_contacts> CallLog_list, List<Read_contacts> Contact_list) {
-
-            sms_list = Sms_list;
-            callLog_list = CallLog_list;
-            contact_list = Contact_list;
-        }
-
-        public List<Read_contacts> getSms_list() {
-            return sms_list;
-        }
-
-        public List<Read_contacts> getCallLog_list() {
-            return callLog_list;
-        }
-
-        public List<Read_contacts> getContact_list() {
-            return contact_list;
-        }
-
-
-    }
-
 }
-
-
-
-
-
 
 

@@ -16,7 +16,7 @@
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="notification"
-        android:summary="Notification me when call or message blocked"
+        android:summary="Notify me when call or message blocked"
         android:title="Notification" />
 
     <!--<ListPreference-->

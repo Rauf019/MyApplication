@@ -28,13 +28,14 @@ public class SampleAdapter extends ArrayAdapter<Contact> {
     private List<Contact> contact1;
 
     public SampleAdapter(final Context context, List<Contact> contact1) {
+
         super(context, R.layout.list_item_sample, contact1);
         dataBaseHelper = new DataBaseHelper(getContext());
         this.contact1 = contact1;
         mLayoutInflater = LayoutInflater.from(context);
         dataBaseHelper = new DataBaseHelper(getContext());
         mRandom = new Random();
-        mBackgroundColors = new ArrayList<Integer>();
+        mBackgroundColors = new ArrayList<>();
         mBackgroundColors.add(R.color.orange);
         mBackgroundColors.add(R.color.blue);
         mBackgroundColors.add(R.color.grey);
@@ -46,13 +47,13 @@ public class SampleAdapter extends ArrayAdapter<Contact> {
     public void updateReceiptsList() {
 
         contact1.clear();
-        contact1.addAll(dataBaseHelper.getAllContacts_true());
+        contact1.addAll(dataBaseHelper.getAllContacts());
         this.notifyDataSetChanged();
+
     }
 
     @Override
     public View getView(final int position, View convertView, final ViewGroup parent) {
-
         try {
 
             ViewHolder vh;
@@ -70,18 +71,11 @@ public class SampleAdapter extends ArrayAdapter<Contact> {
                 vh = (ViewHolder) convertView.getTag();
             }
 
-//            TextView txtLineOne = (TextView) convertView.findViewById(R.id.txt_line1);
-//            ImageView contact_img = (ImageView) convertView.findViewById(R.id.contact_image);
-//            ImageView Del_btn = (ImageView) convertView.findViewById(R.id.del);
-//            ImageView call_icon = (ImageView) convertView.findViewById(R.id.call_icon);
-//            ImageView msg_icon = (ImageView) convertView.findViewById(R.id.msg_icon);
-
 
             int backgroundIndex = position >= mBackgroundColors.size() ?
                     position % mBackgroundColors.size() : position;
 
             convertView.setBackgroundResource(mBackgroundColors.get(backgroundIndex));
-
 
             final Contact contact = contact1.get(position);
 

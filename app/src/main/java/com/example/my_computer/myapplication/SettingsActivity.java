@@ -38,7 +38,7 @@ public class SettingsActivity extends PreferenceActivity {
 
                 Intent emailIntent = new Intent(Intent.ACTION_SEND);
                 emailIntent.setType("text/plain");
-                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Try App ! " + preference.getContext().getString(R.string.app_name) + " its great");
+                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Try  " + preference.getContext().getString(R.string.app_name) + " its great");
                 emailIntent.putExtra(Intent.EXTRA_TEXT, "I am using " + preference.getContext().getString(R.string.app_name) + " app  try this app its great !");
                 preference.setIntent((Intent.createChooser(emailIntent, "Share via")));
 

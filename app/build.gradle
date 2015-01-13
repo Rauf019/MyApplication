@@ -2,11 +2,11 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
     }
-    compileSdkVersion 18
+    compileSdkVersion 21
     buildToolsVersion '20.0.0'
 
     defaultConfig {
-        applicationId 'com.example.my_computer.myapplication'
+        applicationId 'com.pebsol.call_out'
         minSdkVersion 7
         targetSdkVersion 18
         versionCode 1
@@ -14,14 +14,17 @@ android {
 
     }
     buildTypes {
+
+
         release {
-            runProguard true
+
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
 
     }
     productFlavors {
     }
+
 }
 
 dependencies {

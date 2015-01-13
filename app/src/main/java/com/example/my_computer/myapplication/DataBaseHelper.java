@@ -77,24 +77,26 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
             SQLiteDatabase db = this.getReadableDatabase();
             contact = new Contact();
+
             Cursor cursor = db.query(TABLE_CONTACTS, new String[]{
                             PHONE_NUMBER, NAME, IS_CALL_BLOCK, IS_MSG_BLOCK, PHOTO},
                     PHONE_NUMBER + "= ?", new String[]{String.valueOf(a)},
                     null, null, null, null);
-            cursor.moveToFirst();
 
-            do {
+            if (cursor.moveToFirst()) {
 
-                contact.set_phoneNumber(cursor.getString(0));
-                contact.set_Name(cursor.getString(1));
-                contact.set_is_Call_block(stringToBool(cursor.getString(2)));
-                contact.set_is_Msg_block(stringToBool(cursor.getString(3)));
-                contact.setPhoto(cursor.getString(4));
+                do {
 
-            } while (cursor.moveToNext());
+                    contact.set_phoneNumber(cursor.getString(0));
+                    contact.set_Name(cursor.getString(1));
+                    contact.set_is_Call_block(stringToBool(cursor.getString(2)));
+                    contact.set_is_Msg_block(stringToBool(cursor.getString(3)));
+                    contact.setPhoto(cursor.getString(4));
 
+                } while (cursor.moveToNext());
+            }
             cursor.close();
-            db.close();
+            this.getWritableDatabase().close();
             return contact;
 
         } catch (Exception e) {
@@ -106,74 +108,74 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     }
 
 
-    public List<Contact> Sort_By(String val) {
+//    public List<Contact> Sort_By(String val) {
+//
+//        List<Contact> contactList = null;
+//        try {
+//
+//
+//            SQLiteDatabase db = this.getReadableDatabase();
+//            contactList = new ArrayList<Contact>();
+//
+//            String sql_statement = "SELECT * FROM " + TABLE_CONTACTS + " WHERE " + val + " = " + " 1 ";
+//            Cursor cursor = db.rawQuery(sql_statement, null);
+//            cursor.moveToFirst();
+//
+//            do {
+//                Contact contact = new Contact();
+//                contact.set_phoneNumber(cursor.getString(0));
+//                contact.set_Name(cursor.getString(1));
+//                contact.set_is_Call_block(stringToBool(cursor.getString(2)));
+//                contact.set_is_Msg_block(stringToBool(cursor.getString(3)));
+//                contact.setPhoto(cursor.getString(4));
+//                contactList.add(contact);
+//            } while (cursor.moveToNext());
+//
+//            cursor.close();
+//            db.close();
+//            return contactList;
+//        } catch (Exception e) {
+//
+//            String message = e.getMessage();
+//
+//            return contactList;
+//        }
+//
+//
+//    }
 
-        List<Contact> contactList = null;
-        try {
-
-
-            SQLiteDatabase db = this.getReadableDatabase();
-            contactList = new ArrayList<Contact>();
-
-            String sql_statement = "SELECT * FROM " + TABLE_CONTACTS + " WHERE " + val + " = " + " 1 ";
-            Cursor cursor = db.rawQuery(sql_statement, null);
-            cursor.moveToFirst();
-
-            do {
-                Contact contact = new Contact();
-                contact.set_phoneNumber(cursor.getString(0));
-                contact.set_Name(cursor.getString(1));
-                contact.set_is_Call_block(stringToBool(cursor.getString(2)));
-                contact.set_is_Msg_block(stringToBool(cursor.getString(3)));
-                contact.setPhoto(cursor.getString(4));
-                contactList.add(contact);
-            } while (cursor.moveToNext());
-
-            cursor.close();
-            db.close();
-            return contactList;
-        } catch (Exception e) {
-
-            String message = e.getMessage();
-
-            return contactList;
-        }
-
-
-    }
+//    public List<Contact> getAllContacts() {
+//
+//        List<Contact> contactList = null;
+//
+//        try {
+//            contactList = new ArrayList<Contact>();
+//
+//            String selectQuery = "SELECT * FROM " + TABLE_CONTACTS;
+//
+//            SQLiteDatabase db = this.getWritableDatabase();
+//            Cursor cursor = db.rawQuery(selectQuery, null);
+//            cursor.moveToFirst();
+//
+//            do {
+//
+//                contactList.add(new Contact(cursor.getString(0), cursor.getString(1),
+//                        stringToBool(cursor.getString(2)), stringToBool(cursor.getString(3)), cursor.getString(4)));
+//
+//            } while (cursor.moveToNext());
+//
+//            cursor.close();
+//            this.getWritableDatabase().close();
+//            return contactList;
+//
+//        } catch (Exception e) {
+//
+//
+//            return contactList;
+//        }
+//    }
 
     public List<Contact> getAllContacts() {
-
-        List<Contact> contactList = null;
-
-        try {
-            contactList = new ArrayList<Contact>();
-
-            String selectQuery = "SELECT * FROM " + TABLE_CONTACTS;
-
-            SQLiteDatabase db = this.getWritableDatabase();
-            Cursor cursor = db.rawQuery(selectQuery, null);
-            cursor.moveToFirst();
-
-            do {
-
-                contactList.add(new Contact(cursor.getString(0), cursor.getString(1),
-                        stringToBool(cursor.getString(2)), stringToBool(cursor.getString(3)), cursor.getString(4)));
-
-            } while (cursor.moveToNext());
-
-            cursor.close();
-            db.close();
-            return contactList;
-
-        } catch (Exception e) {
-
-
-            return contactList;
-        }
-    }
-
-    public List<Contact> getAllContacts_true() {
 
         List<Contact> contactList = null;
 
@@ -194,7 +196,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
 
             cursor.close();
-            db.close();
+            this.getWritableDatabase().close();
             return contactList;
 
         } catch (Exception e) {
@@ -202,23 +204,22 @@ public class DataBaseHelper extends SQLiteOpenHelper {
             e.printStackTrace();
             return contactList;
         }
+
     }
 
-    public int getContactsCount() {
-        String countQuery = "SELECT  * FROM " + TABLE_CONTACTS;
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(countQuery, null);
-        cursor.close();
-
-        return cursor.getCount();
-    }
+//    public int getContactsCount() {
+//        String countQuery = "SELECT  * FROM " + TABLE_CONTACTS;
+//        SQLiteDatabase db = this.getReadableDatabase();
+//        Cursor cursor = db.rawQuery(countQuery, null);
+//        cursor.close();
+//
+//        return cursor.getCount();
+//    }
 
     public boolean updateContact(Contact contact) {
         try {
 
-
             SQLiteDatabase db = this.getWritableDatabase();
-
             ContentValues values = new ContentValues();
             values.put(PHONE_NUMBER, contact.get_phoneNumber());
             values.put(NAME, contact.get_Name());
@@ -226,9 +227,9 @@ public class DataBaseHelper extends SQLiteOpenHelper {
             values.put(IS_MSG_BLOCK, contact.get_is_Msg_block());
             values.put(PHOTO, contact.getPhoto());
 
-            int update = db.update(TABLE_CONTACTS, values, PHONE_NUMBER + " = ?",
+            db.update(TABLE_CONTACTS, values, PHONE_NUMBER + " = ?",
                     new String[]{String.valueOf(contact.get_phoneNumber())});
-            db.close();
+            this.getWritableDatabase().close();
             return true;
         } catch (Exception e) {
             // TODO Auto-generated catch block
@@ -246,13 +247,13 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return delete;
     }
 
-    public int deleteContact_sort(String val) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        int delete = db.delete(TABLE_CONTACTS, PHONE_NUMBER + " = ?",
-                new String[]{String.valueOf(val)});
+//    public int deleteContact_sort(String val) {
+//        SQLiteDatabase db = this.getWritableDatabase();
+//        int delete = db.delete(TABLE_CONTACTS, PHONE_NUMBER + " = ?",
+//                new String[]{String.valueOf(val)});
 
 
-        db.close();
-        return delete;
-    }
+//        db.close();
+//        return delete;
+//    }
 }

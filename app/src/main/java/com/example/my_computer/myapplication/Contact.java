@@ -2,10 +2,10 @@ package com.example.my_computer.myapplication;
 
 public class Contact {
 
-    String _Name;
-    String _phoneNumber;
-    boolean _is_Call_block;
-    boolean _is_Msg_block;
+    private String _Name;
+    private String _phoneNumber;
+    private boolean _is_Call_block;
+    private boolean _is_Msg_block;
     private String photo;
 
     public Contact(String _phoneNumber, String _Name, boolean _is_Call_block,
@@ -18,7 +18,6 @@ public class Contact {
 
         this.photo = photo;
     }
-
 
     public Contact(String _phoneNumber, String _Name) {
         this._phoneNumber = _phoneNumber;
